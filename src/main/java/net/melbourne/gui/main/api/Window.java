@@ -6,6 +6,7 @@ import net.melbourne.Managers;
 import net.melbourne.gui.main.impl.FeatureButton;
 import net.melbourne.modules.Category;
 import net.melbourne.modules.Feature;
+import net.melbourne.modules.impl.client.ClickGuiFeature;
 import net.melbourne.utils.animations.Animation;
 import net.melbourne.utils.animations.Easing;
 import net.melbourne.utils.graphics.impl.Renderer2D;
@@ -30,7 +31,6 @@ public class Window {
     private int dragY = 0;
     private boolean open = true;
     private boolean dragging = false;
-
     private String searchQuery = null;
 
     public Window(Category category, int x, int y) {
@@ -55,11 +55,10 @@ public class Window {
         int alpha = (int) animation.get(dragging ? 75 : 0);
         Renderer2D.renderQuad(context, x, y, x + width, y + height, new Color(0, 0, 0, alpha));
 
-        FontUtils.drawCenteredTextWithShadow(context, category.getName(), (int) (x + width/2), (int) (y + height/2), Color.WHITE);
+        FontUtils.drawCenteredTextWithShadow(context, category.getName(), (int) (x + width / 2), (int) (y + height / 2), Color.WHITE);
 
         float currentY = height + 1;
         float targetY = 2;
-
         for (FeatureButton button : buttons) {
             button.setX(x + 4);
             button.setY(y + currentY);
@@ -68,7 +67,6 @@ public class Window {
         }
 
         float scale = Easing.ease(Easing.toDelta(openTime, 150), Easing.Method.EASE_OUT_CUBIC);
-
         if (open || scale != 1.0f) {
             if (scale != 1.0f)
                 context.enableScissor((int) x, (int) (y + height), (int) (x + width), (int) (y + height + (targetY * (open ? scale : 1.0f - scale)) + 2));
@@ -76,12 +74,16 @@ public class Window {
             context.getMatrices().pushMatrix();
             context.getMatrices().translate(0, -targetY + (targetY * (open ? scale : 1.0f - scale)));
 
-            Renderer2D.renderQuad(context, x, y + height, x + width, y + currentY + 1, new Color(30, 30, 30, 150));
-            Renderer2D.renderOutline(context, x, y + height, x + width, y + currentY + 1, ColorUtils.getGlobalColor(200));
-            Renderer2D.renderOutline(context, x, y + height, x + width, y + currentY + 1, new Color(0, 0, 0, alpha));
+            ClickGuiFeature clickGui = Managers.FEATURE.getFeatureFromClass(ClickGuiFeature.class);
+            Color bg = clickGui.backgroundColor.getColor();
+            Renderer2D.renderQuad(context, x, y + height, x + width, y + currentY + 1, bg);
+
+            if (clickGui.outline.getValue()) {
+                Renderer2D.renderOutline(context, x, y + height, x + width, y + currentY + 1, ColorUtils.getGlobalColor(200));
+                Renderer2D.renderOutline(context, x, y + height, x + width, y + currentY + 1, new Color(0, 0, 0, alpha));
+            }
 
             buttons.forEach(b -> b.render(context, mouseX, mouseY, delta));
-
             context.getMatrices().popMatrix();
 
             if (scale != 1.0f)
@@ -119,7 +121,6 @@ public class Window {
                 return true;
             }
         }
-
         if (open) buttons.forEach(b -> b.mouseClicked(mouseX, mouseY, button));
         return false;
     }
