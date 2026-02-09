@@ -32,13 +32,14 @@ public class FeatureButton extends Button {
     private float currentProgress = 0;
 
     private boolean open = false;
+    private boolean searchMatch = false;
 
     public FeatureButton(Feature feature, Window window) {
         super(window);
         this.feature = feature;
         animation.get(feature.isEnabled() ? 200 : 0);
 
-        for(Setting uncastedSetting : feature.getSettings()) {
+        for (Setting uncastedSetting : feature.getSettings()) {
             switch (uncastedSetting) {
                 case BooleanSetting setting -> buttons.add(new BooleanButton(setting, window));
                 case BindSetting setting -> buttons.add(new BindButton(setting, window));
@@ -52,12 +53,29 @@ public class FeatureButton extends Button {
         }
     }
 
+    public void updateSearchMatch(String query) {
+        if (query == null || query.isEmpty()) {
+            searchMatch = false;
+            return;
+        }
+        String name = feature.getName().toLowerCase();
+        searchMatch = name.contains(query);
+    }
+
+    public boolean isSearchMatch() {
+        return searchMatch;
+    }
+
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
         Renderer2D.renderQuad(context, getX() - 2.5f, getY() + 0.5f, getX() + getWidth() + 2.5f, getY() + super.getHeight() - 0.5f, ColorUtils.getGlobalColor((int) animation.get(feature.isEnabled() ? 200 : 0)));
 
         int moduleAlpha = (int) getHoverAnimation().get(isHovering(mouseX, mouseY) ? 75 : 0);
         Renderer2D.renderQuad(context, getX() - 2.5f, getY() + 0.5f, getX() + getWidth() + 2.5f, getY() + super.getHeight() - 0.5f, new Color(0, 0, 0, moduleAlpha));
+
+        if (searchMatch) {
+            Renderer2D.renderOutline(context, getX() - 2.5f, getY() + 0.5f, getX() + getWidth() + 2.5f, getY() + super.getHeight() - 0.5f, new Color(100, 180, 255, 200));
+        }
 
         float tuffX = xAnimation.get(open ? getX() + getWidth() / 2 - (FontUtils.getWidth(feature.getName()) / 2.0F) : getX());
         drawTextWithShadow(context, feature.getName(), tuffX, getY() + getVerticalPadding(), getTextColor(textAnimation, feature.isEnabled()));
@@ -78,7 +96,7 @@ public class FeatureButton extends Button {
 
         float scale = Easing.toDelta(openTime, 150);
 
-        if(open || scale != 1.0f) {
+        if (open || scale != 1.0f) {
             if (scale != 1.0f) context.enableScissor((int) (getX() - 2.5f), (int) (getY() + super.getHeight() - 0.5f), (int) (getX() + getWidth()), (int) (getY() + super.getHeight() + (targetY * (open ? scale : 1.0f - scale))));
 
             Renderer2D.renderQuad(context, getX() - 2.5f, getY() + super.getHeight() - 0.5f, getX() - 1.5f, getY() + super.getHeight() - 0.5f + (targetY * (open ? scale : 1.0f - scale)), ColorUtils.getGlobalColor(200));
@@ -88,7 +106,7 @@ public class FeatureButton extends Button {
             context.getMatrices().translate(0, -targetY + (targetY * (open ? scale : 1.0f - scale)));
 
             for (Button button : buttons) {
-                if(!button.getSetting().isVisible()) continue;
+                if (!button.getSetting().isVisible()) continue;
 
                 int alpha = (int) button.getHoverAnimation().get(button.isHovering(mouseX, mouseY) ? 75 : 0);
                 Renderer2D.renderQuad(context, button.getX() - 1, button.getY(), button.getX() + button.getWidth() + 2.5f, button.getY() + super.getHeight(), new Color(0, 0, 0, alpha));
@@ -98,7 +116,7 @@ public class FeatureButton extends Button {
 
             context.getMatrices().popMatrix();
 
-            if(scale != 1.0f)
+            if (scale != 1.0f)
                 context.disableScissor();
         }
 
@@ -112,8 +130,8 @@ public class FeatureButton extends Button {
 
     @Override
     public void mouseClicked(double mouseX, double mouseY, int button) {
-        if(isHovering(mouseX, mouseY)) {
-            if(button == 0) {
+        if (isHovering(mouseX, mouseY)) {
+            if (button == 0) {
                 if (Managers.FEATURE.getFeatureFromClass(ClickGuiFeature.class).sounds.getValue()) {
                     if (feature.isEnabled()) {
                         SoundUtils.playSound("disabled.wav", 67);
@@ -123,13 +141,13 @@ public class FeatureButton extends Button {
                 }
 
                 feature.setEnabled(!feature.isEnabled());
-            } else if(button == 1) {
+            } else if (button == 1) {
                 open = !open;
                 openTime = System.currentTimeMillis();
             }
         }
 
-        if(open) buttons.stream().filter(b -> b.getSetting().isVisible()).forEach(b -> b.mouseClicked(mouseX, mouseY, button));
+        if (open) buttons.stream().filter(b -> b.getSetting().isVisible()).forEach(b -> b.mouseClicked(mouseX, mouseY, button));
     }
 
     @Override
@@ -139,8 +157,8 @@ public class FeatureButton extends Button {
 
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
-        if(open) {
-            for(Button button : buttons) {
+        if (open) {
+            for (Button button : buttons) {
                 if (!button.getSetting().isVisible()) continue;
                 if (button.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount)) {
                     return true;
@@ -152,12 +170,12 @@ public class FeatureButton extends Button {
 
     @Override
     public void keyPressed(int keyCode, int scanCode, int modifiers) {
-        if(open) buttons.stream().filter(b -> b.getSetting().isVisible()).forEach(b -> b.keyPressed(keyCode, scanCode, modifiers));
+        if (open) buttons.stream().filter(b -> b.getSetting().isVisible()).forEach(b -> b.keyPressed(keyCode, scanCode, modifiers));
     }
 
     @Override
     public void charTyped(char chr, int modifiers) {
-        if(open) buttons.stream().filter(b -> b.getSetting().isVisible()).forEach(b -> b.charTyped(chr, modifiers));
+        if (open) buttons.stream().filter(b -> b.getSetting().isVisible()).forEach(b -> b.charTyped(chr, modifiers));
     }
 
     @Override
