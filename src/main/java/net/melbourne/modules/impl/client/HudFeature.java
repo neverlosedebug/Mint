@@ -55,6 +55,12 @@ import java.util.List;
 public class HudFeature extends Feature {
     private final Animation chatAnimation = new Animation(300, Easing.Method.EASE_OUT_QUAD);
 
+    public NumberSetting gradientSpeed = new NumberSetting("GradientSpeed", "Animation speed for gradient text.", 1.0, 0.1, 5.0,
+            () -> {
+                ColorFeature colorFeature = Managers.FEATURE.getFeatureFromClass(ColorFeature.class);
+                return colorFeature != null && "Gradient".equals(colorFeature.mode.getValue());
+            });
+
     public BooleanSetting watermark = new BooleanSetting("Watermark", "Displays the clients logo on your screen.", true);
     public BooleanSetting moduleList = new BooleanSetting("ModuleList", "Displays a list of modules you have enabled.", true);
     public ModeSetting sortingMode = new ModeSetting("Sorting", "Mode", "Length", new String[]{"Length", "Alphabetical"}, () -> moduleList.getValue());
@@ -497,11 +503,13 @@ public class HudFeature extends Feature {
 
     private void drawHudText(DrawContext context, Text text, float x, float y) {
         ColorFeature colorFeature = Managers.FEATURE.getFeatureFromClass(ColorFeature.class);
-        if ("Gradient".equals(colorFeature.mode.getValue())) {
+        if (colorFeature != null && "Gradient".equals(colorFeature.mode.getValue())) {
             Color main = colorFeature.color.getColor();
             Color dark = GradientTextUtil.darken(main, 0.4f);
             String clean = Formatting.strip(text.getString());
-            GradientTextUtil.drawAnimatedGradientText(context, mc.textRenderer, clean, x, y, System.currentTimeMillis() / 200.0, main, dark, true);
+            double speed = gradientSpeed.getValue().doubleValue();
+            double timeOffset = System.currentTimeMillis() * speed / 1000.0;
+            GradientTextUtil.drawAnimatedGradientText(context, mc.textRenderer, clean, x, y, timeOffset, main, dark, true);
         } else {
             context.drawTextWithShadow(mc.textRenderer, text, (int) x, (int) y, getHudColor(y).getRGB());
         }
