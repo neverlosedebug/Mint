@@ -4,11 +4,10 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import net.melbourne.events.Event;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.PlayerEntity;
 
+// cyka @SEE notifs
 @Getter
 @AllArgsConstructor
-public class AttackEntityEvent extends Event {
-    private final PlayerEntity player;
-    private final Entity target;
+public class AddEntityEvent extends Event {
+    private final Entity entity;
 }

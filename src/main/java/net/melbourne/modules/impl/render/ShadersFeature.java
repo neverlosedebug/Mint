@@ -23,6 +23,7 @@ import java.awt.*;
 
 @FeatureInfo(name = "Shaders", category = Category.Render)
 public class ShadersFeature extends Feature {
+
     public ModeSetting shape = new ModeSetting("Shape", "The portions of the effect that will be rendered", "Both", new String[]{"Fill", "Outline", "Both"});
     public ModeSetting mode = new ModeSetting("Mode", "The shader that will be used to render the effects.", "Glow", new String[]{"Solid", "Glow"});
 
