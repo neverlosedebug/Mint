@@ -1,18 +1,1 @@
-<div align="center">
-<h1>Fusion Client</h1>
-<div>
-  A utility mod for 1.21.8
-</div>
-
-<h1>Info</h1>
-<div align="left">
-there was an unfunny description here and I removed
-it, but the client is bullshit.
-<div align="center">
-<h1>Requirements</h1>
-<div align="left">
-  
-+ Java 21+
-+ Gradle 8.14+
-+ Minecraft 1.21.8
-+ Fabric Loader
+Better Mint Client | 1.21.8 Fabric 
