@@ -2,7 +2,6 @@ package net.melbourne.utils.miscellaneous;
 
 import net.melbourne.Managers;
 import net.melbourne.modules.impl.client.ColorFeature;
-import net.melbourne.settings.types.ColorSetting;
 import net.minecraft.util.Formatting;
 
 import java.awt.*;

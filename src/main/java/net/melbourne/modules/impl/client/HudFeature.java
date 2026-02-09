@@ -109,11 +109,17 @@ public class HudFeature extends Feature {
         if (moduleList.getValue()) {
             List<FeatureEntry> entries = new ArrayList<>();
             for (Feature feature : Managers.FEATURE.getFeatures()) {
-                String text = feature.getName();
+                Text baseName = Text.literal(feature.getName());
+                Text fullText = baseName;
+
                 if (!feature.hiddenMode.getValue().equalsIgnoreCase("Info")) {
                     String info = feature.getInfo();
                     if (!info.isEmpty()) {
-                        text += Formatting.GRAY + " [" + Formatting.WHITE + info + Formatting.GRAY + "]";
+                        fullText = baseName.copy()
+                                .append(Text.literal(" [")
+                                        .formatted(Formatting.GRAY)
+                                        .append(Text.literal(info).formatted(Formatting.WHITE))
+                                        .append(Text.literal("]").formatted(Formatting.GRAY)));
                     }
                 }
 
@@ -121,17 +127,17 @@ public class HudFeature extends Feature {
                     continue;
                 }
 
-                if (!feature.isEnabled() && feature.getAnimationX().get(0) <= (float) (FontUtils.getWidth(text) + 2) / 2) {
+                if (!feature.isEnabled() && feature.getAnimationX().get(0) <= (float) (FontUtils.getWidth(fullText.getString()) + 2) / 2) {
                     continue;
                 }
 
-                entries.add(new FeatureEntry(feature, text));
+                entries.add(new FeatureEntry(feature, fullText));
             }
 
             if (sortingMode.getValue().equalsIgnoreCase("Alphabetical")) {
-                entries.sort(Comparator.comparing(e -> e.text.toLowerCase()));
+                entries.sort(Comparator.comparing(e -> e.text.getString().toLowerCase()));
             } else {
-                entries.sort(Comparator.comparingInt(e -> -FontUtils.getWidth(e.text)));
+                entries.sort(Comparator.comparingInt(e -> -FontUtils.getWidth(e.text.getString())));
             }
 
             featureEntries.clear();
@@ -153,7 +159,7 @@ public class HudFeature extends Feature {
                 }
             }
 
-            potionEntries.sort(Comparator.comparingInt(m -> -FontUtils.getWidth(m.text)));
+            potionEntries.sort(Comparator.comparingInt(m -> -FontUtils.getWidth(m.text.getString())));
 
             float offset = 0;
             for (PotionEntry entry : new ArrayList<>(potionEntries)) {
@@ -308,7 +314,9 @@ public class HudFeature extends Feature {
             } else if (!Melbourne.GIT_HASH.isEmpty()) {
                 versionText += "+" + Melbourne.GIT_HASH;
             }
-            String text = Melbourne.NAME + Formatting.GRAY + " - " + Formatting.WHITE + versionText;
+            Text text = Text.literal(Melbourne.NAME)
+                    .append(Text.literal(" - ").formatted(Formatting.GRAY))
+                    .append(Text.literal(versionText).formatted(Formatting.WHITE));
 
             drawHudText(event.getContext(), text, 1, 1);
         }
@@ -316,7 +324,7 @@ public class HudFeature extends Feature {
         if (moduleList.getValue()) {
             float offset = 0;
             for (FeatureEntry entry : featureEntries) {
-                float width = entry.feature.isEnabled() ? FontUtils.getWidth(entry.text) + 1 : 0;
+                float width = entry.feature.isEnabled() ? FontUtils.getWidth(entry.text.getString()) + 1 : 0;
                 float x = mc.getWindow().getScaledWidth() - entry.feature.getAnimationX().get(width);
                 float y = 2 + entry.feature.getAnimationY().get(offset);
 
@@ -416,9 +424,12 @@ public class HudFeature extends Feature {
                 }
             }
 
-            String text = mint + Formatting.GRAY + " | " + Formatting.GRAY + "(" + Formatting.WHITE + rank + Formatting.GRAY + ")";
+            Text text = Text.literal(mint)
+                    .append(Text.literal(" | (").formatted(Formatting.GRAY))
+                    .append(Text.literal(rank).formatted(Formatting.WHITE))
+                    .append(Text.literal(")").formatted(Formatting.GRAY));
 
-            float w = FontUtils.getWidth(text);
+            float w = FontUtils.getWidth(text.getString());
             float x = mc.getWindow().getScaledWidth() - 2 - w;
             float y = mc.getWindow().getScaledHeight() - chatOffset - 2 - FontUtils.getHeight() - (FontUtils.getHeight() * infoOffsetCount);
 
@@ -430,18 +441,19 @@ public class HudFeature extends Feature {
             float baseY = mc.getWindow().getScaledHeight() - chatOffset - 2 - FontUtils.getHeight() - (FontUtils.getHeight() * infoOffsetCount);
 
             for (PotionEntry entry : potionEntries) {
-                float width = entry.isState() ? FontUtils.getWidth(entry.text) : 0;
+                float width = entry.isState() ? FontUtils.getWidth(entry.text.getString()) : 0;
                 float x = mc.getWindow().getScaledWidth() - 2 - entry.getAnimationX().get(width);
                 float y = baseY - entry.getAnimationY().get(entry.getTargetY());
-                FontUtils.drawTextWithShadow(event.getContext(), entry.text, x, y, entry.color);
+                FontUtils.drawTextWithShadow(event.getContext(), entry.text.getString(), x, y, entry.color);
                 infoOffsetCount++;
             }
         }
 
         for (InfoEntry entry : infoEntries) {
-            float x = mc.getWindow().getScaledWidth() - 2 - (entry.getAnimationX().get(entry.isState() ? FontUtils.getWidth(entry.text + " " + entry.info) : 0));
+            String displayText = entry.text + Formatting.WHITE + " " + entry.info;
+            float x = mc.getWindow().getScaledWidth() - 2 - (entry.getAnimationX().get(entry.isState() ? FontUtils.getWidth(displayText) : 0));
             float y = mc.getWindow().getScaledHeight() - chatOffset - 2 - FontUtils.getHeight() - (FontUtils.getHeight() * infoOffsetCount);
-            drawHudText(event.getContext(), entry.text + Formatting.WHITE + " " + entry.info, x, y);
+            drawHudText(event.getContext(), Text.literal(displayText), x, y);
             infoOffsetCount++;
         }
 
@@ -459,14 +471,14 @@ public class HudFeature extends Feature {
                         MathUtils.round(getDimensionCoord(mc.player.getZ()), 2) + Formatting.GRAY + "]";
             }
 
-            drawHudText(event.getContext(), str, 1.F, y);
+            drawHudText(event.getContext(), Text.literal(str), 1.F, y);
             coordOffset++;
         }
 
         if (direction.getValue()) {
             float y = mc.getWindow().getScaledHeight() - chatOffset - FontUtils.getHeight() - 1 - (FontUtils.getHeight() * coordOffset);
             String str = getDirections();
-            drawHudText(event.getContext(), str, 1.F, y);
+            drawHudText(event.getContext(), Text.literal(str), 1.F, y);
         }
 
         float miscOffset = 0;
@@ -483,14 +495,15 @@ public class HudFeature extends Feature {
         }
     }
 
-    private void drawHudText(DrawContext context, String text, float x, float y) {
+    private void drawHudText(DrawContext context, Text text, float x, float y) {
         ColorFeature colorFeature = Managers.FEATURE.getFeatureFromClass(ColorFeature.class);
         if ("Gradient".equals(colorFeature.mode.getValue())) {
             Color main = colorFeature.color.getColor();
             Color dark = GradientTextUtil.darken(main, 0.4f);
-            GradientTextUtil.drawAnimatedGradientText(context, mc.textRenderer, text, x, y, System.currentTimeMillis() / 200.0, main, dark, true);
+            String clean = Formatting.strip(text.getString());
+            GradientTextUtil.drawAnimatedGradientText(context, mc.textRenderer, clean, x, y, System.currentTimeMillis() / 200.0, main, dark, true);
         } else {
-            FontUtils.drawTextWithShadow(context, text, x, y, getHudColor(y));
+            context.drawTextWithShadow(mc.textRenderer, text, (int) x, (int) y, getHudColor(y).getRGB());
         }
     }
 
@@ -507,12 +520,14 @@ public class HudFeature extends Feature {
         return null;
     }
 
-    private String getPotionText(StatusEffectInstance effect) {
+    private Text getPotionText(StatusEffectInstance effect) {
         int amplifier = effect.getAmplifier() + 1;
         String ampText = amplifier == 1 ? "" : " " + MathUtils.convertNumberToRoman(amplifier);
-        return effect.getEffectType().value().getName().getString() + ampText + " " + Formatting.WHITE +
-                StatusEffectUtil.getDurationText(effect, 1.0F, mc.world.getTickManager().getTickRate()).getString()
-                        .replace(Text.translatable("effect.duration.infinite").getString(), "**:**");
+        String durationStr = StatusEffectUtil.getDurationText(effect, 1.0F, mc.world.getTickManager().getTickRate()).getString()
+                .replace(Text.translatable("effect.duration.infinite").getString(), "**:**");
+        return Text.literal(effect.getEffectType().value().getName().getString() + ampText + " ")
+                .formatted(Formatting.GRAY)
+                .append(Text.literal(durationStr).formatted(Formatting.WHITE));
     }
 
     public boolean isHealthBarEnabled() {
@@ -612,11 +627,11 @@ public class HudFeature extends Feature {
     @Setter
     private static class PotionEntry extends AnimationEntry {
         private final RegistryEntry<StatusEffect> type;
-        private String text;
+        private Text text;
         private Color color;
     }
 
-    public record FeatureEntry(Feature feature, String text) {}
+    public record FeatureEntry(Feature feature, Text text) {}
 
     @AllArgsConstructor
     @Getter
