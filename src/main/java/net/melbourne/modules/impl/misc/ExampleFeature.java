@@ -10,6 +10,10 @@ import net.melbourne.settings.types.*;
 
 import java.awt.*;
 
+/**
+ * @see
+ */
+
 // You need to add this annotation to actually add the module to the client.
 @FeatureInfo(name = "Example", category = Category.Misc)
 public class ExampleFeature extends Feature {

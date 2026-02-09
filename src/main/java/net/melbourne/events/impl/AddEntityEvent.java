@@ -3,9 +3,12 @@ package net.melbourne.events.impl;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import net.melbourne.events.Event;
+import net.melbourne.modules.impl.client.NotificationsFeature;
 import net.minecraft.entity.Entity;
 
-// cyka @SEE notifs
+/**
+ * @see NotificationsFeature
+ */
 @Getter
 @AllArgsConstructor
 public class AddEntityEvent extends Event {
