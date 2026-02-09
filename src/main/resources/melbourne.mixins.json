@@ -54,6 +54,7 @@
     "MultiPhaseParametersMixin",
     "ParticleManagerMixin",
     "PlayerListEntryMixin",
+    "ChatScreenMixin",
     "PlayerListHudMixin",
     "PropertiesMixin",
     "RenderLayerMultiPhaseMixin",

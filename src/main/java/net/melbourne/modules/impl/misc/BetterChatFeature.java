@@ -28,6 +28,10 @@ public class BetterChatFeature extends Feature {
     public TextSetting closing = new TextSetting("Closing", "Bracket after timestamp.", ">",
             () -> timestamps.getValue());
 
+    public BooleanSetting suffix = new BooleanSetting("Suffix", "Adds a custom suffix to chat messages.", true);
+    public TextSetting suffixMessage = new TextSetting("SuffixMessage", "The suffix to append to messages.", " | Mint",
+            () -> suffix.getValue());
+
     public ModeSetting background = new ModeSetting("Background", "Chat background rendering mode.", "Default", new String[]{"Default", "Clear", "Custom"});
     public ColorSetting customColor = new ColorSetting("Color", "Custom background color.", new Color(0, 0, 0, 120),
             () -> background.getValue().equals("Custom"));
