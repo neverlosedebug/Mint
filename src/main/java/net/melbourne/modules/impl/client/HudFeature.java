@@ -28,7 +28,6 @@ import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.ChestBlockEntity;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ChatScreen;
-import net.minecraft.client.gui.screen.ingame.StatusEffectsDisplay;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
@@ -39,9 +38,6 @@ import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.World;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.ChunkStatus;
 import net.minecraft.world.chunk.WorldChunk;
@@ -62,7 +58,7 @@ public class HudFeature extends Feature {
     public ModeSetting sortingMode = new ModeSetting("Sorting", "Mode", "Length", new String[]{"Length", "Alphabetical"}, () -> moduleList.getValue());
 
     public BooleanSetting coordinates = new BooleanSetting("Coordinates", "Displays your ingame world coordinates.", true);
-    public BooleanSetting direction = new BooleanSetting("Direction", "Displays your ingame direction.", true);
+    public BooleanSetting direction = new BooleanSetting("Direction", "Displays your ingame direction.", false);
     public BooleanSetting nether = new BooleanSetting("Nether", "Displays your coordinates if you were in the nether.", true, () -> coordinates.getValue());
 
     public BooleanSetting armor = new BooleanSetting("Armor", "Displays equipped armor and durability percentages.", true);
@@ -73,20 +69,20 @@ public class HudFeature extends Feature {
     public BooleanSetting armorWarning = new BooleanSetting("ArmorWarning", "Warns when armor durability is low.", true);
     public NumberSetting durabilityThreshold = new NumberSetting("DurabilityThreshold", "Percentage threshold for warnings.", 20, 1, 100, () -> armorWarning.getValue());
 
-    public BooleanSetting potions = new BooleanSetting("Potions", "Displays a list of your potion effects.", true);
+    public BooleanSetting potions = new BooleanSetting("Potions", "Displays a list of your potion effects.", false);
     public BooleanSetting mintUsername = new BooleanSetting("ClientInfo", "Displays your Mint username in the bottom-right.", true);
 
     public BooleanSetting fps = new BooleanSetting("FPS", "Displays your current FPS.", true);
-    public BooleanSetting tps = new BooleanSetting("TPS", "Displays the servers current tickrate.", true);
+    public BooleanSetting tps = new BooleanSetting("TPS", "Displays the servers current tickrate.", false);
     public BooleanSetting averageTps = new BooleanSetting("AverageTPS", "Displays additional average tickrate.", false, () -> tps.getValue());
     public BooleanSetting ping = new BooleanSetting("Ping", "Displays the ping to the server.", true);
-    public BooleanSetting speedometer = new BooleanSetting("Speedometer", "Displays your current speed.", true);
-    public BooleanSetting brand = new BooleanSetting("Brand", "Displays server software brand.", true);
-    public BooleanSetting durability = new BooleanSetting("Durability", "Displays the durability of your held item.", true);
+    public BooleanSetting speedometer = new BooleanSetting("Speedometer", "Displays your current speed.", false);
+    public BooleanSetting brand = new BooleanSetting("Brand", "Displays server software brand.", false);
+    public BooleanSetting durability = new BooleanSetting("Durability", "Displays the durability of your held item.", false);
     public BooleanSetting pearlCooldown = new BooleanSetting("PearlCooldown", "Displays a timer with pearl cooldown.", true);
     public BooleanSetting serverLag = new BooleanSetting("ServerLag", "Displays lag timer.", true);
 
-    public BooleanSetting chestCounter = new BooleanSetting("ChestCounter", "Displays the amount of loaded chests.", true);
+    public BooleanSetting chestCounter = new BooleanSetting("ChestCounter", "Displays the amount of loaded chests.", false);
 
     public ModeSetting healthBarMode = new ModeSetting("HealthBar", "Health bar above hotbar", "None", new String[]{"None", "Sync", "Dynamic"});
 

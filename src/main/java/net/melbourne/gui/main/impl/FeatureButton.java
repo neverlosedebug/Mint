@@ -77,6 +77,13 @@ public class FeatureButton extends Button {
             Renderer2D.renderOutline(context, getX() - 2.5f, getY() + 0.5f, getX() + getWidth() + 2.5f, getY() + super.getHeight() - 0.5f, new Color(100, 180, 255, 200));
         }
 
+        ClickGuiFeature clickGui = Managers.FEATURE.getFeatureFromClass(ClickGuiFeature.class);
+
+        if (clickGui.showGear.getValue()) {
+            String symbol = open ? clickGui.closeSymbol.getValue() : clickGui.openSymbol.getValue();
+            drawTextWithShadow(context, symbol, getX() + getWidth() - 10, getY() + getVerticalPadding(), Color.WHITE);
+        }
+
         float tuffX = xAnimation.get(open ? getX() + getWidth() / 2 - (FontUtils.getWidth(feature.getName()) / 2.0F) : getX());
         drawTextWithShadow(context, feature.getName(), tuffX, getY() + getVerticalPadding(), getTextColor(textAnimation, feature.isEnabled()));
 
