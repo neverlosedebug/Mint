@@ -20,7 +20,9 @@ import java.util.Set;
 
 @FeatureInfo(name = "NoRender", category = Category.Render)
 public class NoRenderFeature extends Feature {
+
     public BooleanSetting hurtCamera = new BooleanSetting("HurtCamera", "Disables the rendering of the hurt camera.", true);
+    public BooleanSetting scoreboard = new BooleanSetting("Scoreboard", "Disables the rendering of the scoreboard sidebar.", true);
     public BooleanSetting explosions = new BooleanSetting("Explosions", "Disables the rendering of explosion particles.", true);
     public BooleanSetting fireOverlay = new BooleanSetting("FireOverlay", "Disables the rendering of the fire overlay.", true);
     public BooleanSetting blockOverlay = new BooleanSetting("BlockOverlay", "Disables the rendering of the block suffocation overlay.", false);
@@ -28,8 +30,8 @@ public class NoRenderFeature extends Feature {
     public BooleanSetting snowOverlay = new BooleanSetting("SnowOverlay", "Disables the rendering of the snow overlay.", false);
     public BooleanSetting pumpkinOverlay = new BooleanSetting("PumpkinOverlay", "Disables the rendering of the pumpkin overlay.", true);
     public BooleanSetting portalOverlay = new BooleanSetting("PortalOverlay", "Disables the rendering of the portal overlay.", false);
-    public BooleanSetting totemAnimation = new BooleanSetting("TotemAnimation", "Disables the rendering of the totem pop animation.", false);
-    public BooleanSetting bossBar = new BooleanSetting("BossBar", "Disables the rendering of the boss bar.", false);
+    public BooleanSetting totemAnimation = new BooleanSetting("TotemAnimation", "Disables the rendering of the totem pop animation.", true);
+    public BooleanSetting bossBar = new BooleanSetting("BossBar", "Disables the rendering of the boss bar.", true);
     public BooleanSetting vignette = new BooleanSetting("Vignette", "Disables the rendering of the vignette.", true);
     public BooleanSetting blindness = new BooleanSetting("Blindness", "Disables the rendering of the blindness and darkness potion effects.", true);
     public BooleanSetting signText = new BooleanSetting("SignText", "Disables the rendering of sign text.", false);

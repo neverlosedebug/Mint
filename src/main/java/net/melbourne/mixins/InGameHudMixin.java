@@ -1,7 +1,6 @@
 package net.melbourne.mixins;
 
 import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
-import com.llamalad7.mixinextras.sugar.Local;
 import net.melbourne.Managers;
 import net.melbourne.Melbourne;
 import net.melbourne.events.impl.RenderHudEvent;
@@ -12,8 +11,8 @@ import net.melbourne.utils.Globals;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.hud.InGameHud;
 import net.minecraft.client.render.RenderTickCounter;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
+import net.minecraft.scoreboard.ScoreboardObjective;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.profiler.Profilers;
 import org.spongepowered.asm.mixin.Mixin;
@@ -48,6 +47,22 @@ public class InGameHudMixin implements Globals {
     private void onRenderCrosshair(DrawContext context, RenderTickCounter tickCounter, CallbackInfo ci) {
         if (Managers.FEATURE.getFeatureFromClass(CrosshairFeature.class).isEnabled()) {
             ci.cancel();
+        }
+    }
+
+    @Inject(method = "renderScoreboardSidebar(Lnet/minecraft/client/gui/DrawContext;Lnet/minecraft/scoreboard/ScoreboardObjective;)V", at = @At("HEAD"), cancellable = true)
+    private void onRenderScoreboardSidebar(DrawContext context, ScoreboardObjective objective, CallbackInfo callbackInfo) {
+        NoRenderFeature noRender = Managers.FEATURE.getFeatureFromClass(NoRenderFeature.class);
+        if (noRender.isEnabled() && noRender.scoreboard.getValue()) {
+            callbackInfo.cancel();
+        }
+    }
+
+    @Inject(method = "renderScoreboardSidebar(Lnet/minecraft/client/gui/DrawContext;Lnet/minecraft/client/render/RenderTickCounter;)V", at = @At("HEAD"), cancellable = true)
+    private void onRenderScoreboardSidebar(DrawContext context, RenderTickCounter tickCounter, CallbackInfo callbackInfo) {
+        NoRenderFeature noRender = Managers.FEATURE.getFeatureFromClass(NoRenderFeature.class);
+        if (noRender.isEnabled() && noRender.scoreboard.getValue()) {
+            callbackInfo.cancel();
         }
     }
 
