@@ -53,6 +53,7 @@
     "MouseMixin",
     "MultiPhaseParametersMixin",
     "ParticleManagerMixin",
+    "InactivityFpsLimiterMixin",
     "PlayerListEntryMixin",
     "ChatScreenMixin",
     "PlayerListHudMixin",
