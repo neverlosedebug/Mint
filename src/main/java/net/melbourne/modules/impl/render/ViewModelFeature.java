@@ -7,14 +7,13 @@ import net.melbourne.modules.Feature;
 import net.melbourne.modules.FeatureInfo;
 import net.melbourne.settings.types.BooleanSetting;
 import net.melbourne.settings.types.NumberSetting;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.Arm;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.RotationAxis;
 
-@FeatureInfo(name = "Viewmodel", category = Category.Render)
-public class ViewmodelFeature extends Feature {
+@FeatureInfo(name = "ViewModel", category = Category.Render)
+public class ViewModelFeature extends Feature {
 
     public final NumberSetting transX = new NumberSetting("TranslateX", "", 0.0, -2.0, 2.0);
     public final NumberSetting transY = new NumberSetting("TranslateY", "", 0.0, -2.0, 2.0);

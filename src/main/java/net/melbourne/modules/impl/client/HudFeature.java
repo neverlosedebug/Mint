@@ -20,6 +20,7 @@ import net.melbourne.utils.animations.Animation;
 import net.melbourne.utils.animations.Easing;
 import net.melbourne.utils.entity.EntityUtils;
 import net.melbourne.utils.graphics.impl.Renderer2D;
+import net.melbourne.utils.graphics.impl.elements.GradientTextUtil;
 import net.melbourne.utils.graphics.impl.font.FontUtils;
 import net.melbourne.utils.miscellaneous.ColorUtils;
 import net.melbourne.utils.miscellaneous.math.MathUtils;
@@ -27,6 +28,7 @@ import net.melbourne.utils.miscellaneous.irc.BotManager;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.ChestBlockEntity;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ChatScreen;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.effect.StatusEffect;
@@ -75,7 +77,7 @@ public class HudFeature extends Feature {
     public BooleanSetting fps = new BooleanSetting("FPS", "Displays your current FPS.", true);
     public BooleanSetting tps = new BooleanSetting("TPS", "Displays the servers current tickrate.", false);
     public BooleanSetting averageTps = new BooleanSetting("AverageTPS", "Displays additional average tickrate.", false, () -> tps.getValue());
-    public BooleanSetting ping = new BooleanSetting("Ping", "Displays the ping to the server.", true);
+    public BooleanSetting ping = new BooleanSetting("Ping", "Displays the ping to the server.", false);
     public BooleanSetting speedometer = new BooleanSetting("Speedometer", "Displays your current speed.", false);
     public BooleanSetting brand = new BooleanSetting("Brand", "Displays server software brand.", false);
     public BooleanSetting durability = new BooleanSetting("Durability", "Displays the durability of your held item.", false);
@@ -308,7 +310,7 @@ public class HudFeature extends Feature {
             }
             String text = Melbourne.NAME + Formatting.GRAY + " - " + Formatting.WHITE + versionText;
 
-            FontUtils.drawTextWithShadow(event.getContext(), text, 1, 1, getHudColor(1));
+            drawHudText(event.getContext(), text, 1, 1);
         }
 
         if (moduleList.getValue()) {
@@ -323,11 +325,7 @@ public class HudFeature extends Feature {
                     entry.feature.setNewEntry(false);
                 }
 
-                event.getContext().getMatrices().pushMatrix();
-                event.getContext().getMatrices().translate(x, y);
-                FontUtils.drawTextWithShadow(event.getContext(), entry.text, 0, 0, getHudColor(y));
-                event.getContext().getMatrices().popMatrix();
-
+                drawHudText(event.getContext(), entry.text, x, y);
                 offset += FontUtils.getHeight();
             }
         }
@@ -424,7 +422,7 @@ public class HudFeature extends Feature {
             float x = mc.getWindow().getScaledWidth() - 2 - w;
             float y = mc.getWindow().getScaledHeight() - chatOffset - 2 - FontUtils.getHeight() - (FontUtils.getHeight() * infoOffsetCount);
 
-            FontUtils.drawTextWithShadow(event.getContext(), text, x, y, getHudColor(y));
+            drawHudText(event.getContext(), text, x, y);
             infoOffsetCount++;
         }
 
@@ -443,7 +441,7 @@ public class HudFeature extends Feature {
         for (InfoEntry entry : infoEntries) {
             float x = mc.getWindow().getScaledWidth() - 2 - (entry.getAnimationX().get(entry.isState() ? FontUtils.getWidth(entry.text + " " + entry.info) : 0));
             float y = mc.getWindow().getScaledHeight() - chatOffset - 2 - FontUtils.getHeight() - (FontUtils.getHeight() * infoOffsetCount);
-            FontUtils.drawTextWithShadow(event.getContext(), entry.text + Formatting.WHITE + " " + entry.info, x, y, getHudColor(y));
+            drawHudText(event.getContext(), entry.text + Formatting.WHITE + " " + entry.info, x, y);
             infoOffsetCount++;
         }
 
@@ -461,15 +459,14 @@ public class HudFeature extends Feature {
                         MathUtils.round(getDimensionCoord(mc.player.getZ()), 2) + Formatting.GRAY + "]";
             }
 
-
-            FontUtils.drawTextWithShadow(event.getContext(), str, 1.F, y, getHudColor(y));
+            drawHudText(event.getContext(), str, 1.F, y);
             coordOffset++;
         }
 
         if (direction.getValue()) {
             float y = mc.getWindow().getScaledHeight() - chatOffset - FontUtils.getHeight() - 1 - (FontUtils.getHeight() * coordOffset);
             String str = getDirections();
-            FontUtils.drawTextWithShadow(event.getContext(), str, 1.F, y, getHudColor(y));
+            drawHudText(event.getContext(), str, 1.F, y);
         }
 
         float miscOffset = 0;
@@ -483,6 +480,17 @@ public class HudFeature extends Feature {
             float x = (mc.getWindow().getScaledWidth() / 2.f) - (FontUtils.getWidth(text) / 2.f);
             FontUtils.drawTextWithShadow(event.getContext(), text, x, y - FontUtils.getHeight(), entry.getColor());
             miscOffset += FontUtils.getHeight() + 1;
+        }
+    }
+
+    private void drawHudText(DrawContext context, String text, float x, float y) {
+        ColorFeature colorFeature = Managers.FEATURE.getFeatureFromClass(ColorFeature.class);
+        if ("Gradient".equals(colorFeature.mode.getValue())) {
+            Color main = colorFeature.color.getColor();
+            Color dark = GradientTextUtil.darken(main, 0.4f);
+            GradientTextUtil.drawAnimatedGradientText(context, mc.textRenderer, text, x, y, System.currentTimeMillis() / 200.0, main, dark, true);
+        } else {
+            FontUtils.drawTextWithShadow(context, text, x, y, getHudColor(y));
         }
     }
 
@@ -515,7 +523,6 @@ public class HudFeature extends Feature {
         return mc.world.getRegistryKey().getValue().getPath().contains("nether") ? coord * 8.0 : coord / 8.0;
     }
 
-
     private String getDirections() {
         String[] directions = new String[]{"South ", "South West ", "West ", "North West ", "North ", "North East ", "East ", "South East "};
         String[] axis = new String[]{"+Z", "+Z -X", "-X", "-Z -X", "-Z", "-Z +X", "+X", "+Z +X"};
@@ -529,20 +536,21 @@ public class HudFeature extends Feature {
     private Color getHudColor(float offset) {
         long index = (long) ((offset / FontUtils.getHeight()) * (200L));
 
-        if (Managers.FEATURE.getFeatureFromClass(ColorFeature.class).mode.getValue().equalsIgnoreCase("Static")) {
+        ColorFeature color = Managers.FEATURE.getFeatureFromClass(ColorFeature.class);
+        if ("Static".equals(color.mode.getValue())) {
             if (colorMode.getValue().equals("Wave") || colorMode.getValue().equals("Transition")) {
                 return colorMode.getValue().equals("Wave") ? ColorUtils.getOffsetWave(ColorUtils.getGlobalColor(), index) : ColorUtils.getTransitionColor(ColorUtils.getGlobalColor(), secondColor.getColor(), index);
             }
-
             return ColorUtils.getGlobalColor();
-        } else {
-            ColorFeature color = Managers.FEATURE.getFeatureFromClass(ColorFeature.class);
+        } else if ("Rainbow".equals(color.mode.getValue())) {
             return ColorUtils.getRainbowColor(color.rainbowSpeed.getValue().longValue(),
                     color.rainbowLength.getValue().longValue(),
                     color.rainbowSaturation.getValue().floatValue(), (long) offset);
+        } else {
+            return ColorUtils.getGlobalColor();
         }
     }
-    
+
     private double countLoadedChests() {
         if (mc.world == null || mc.player == null) return 0.0;
 

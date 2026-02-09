@@ -8,7 +8,7 @@ import net.melbourne.Melbourne;
 import net.melbourne.events.impl.ItemRenderEvent;
 import net.melbourne.events.impl.RenderHandEvent;
 import net.melbourne.modules.impl.render.HandProgressFeature;
-import net.melbourne.modules.impl.render.ViewmodelFeature;
+import net.melbourne.modules.impl.render.ViewModelFeature;
 import net.melbourne.modules.impl.player.SwingFeature;
 import net.melbourne.utils.Globals;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
@@ -57,7 +57,7 @@ public abstract class HeldItemRendererMixin implements Globals {
             at = @At(value = "INVOKE", target = "Lnet/minecraft/client/util/math/MatrixStack;multiply(Lorg/joml/Quaternionfc;)V")
     )
     private boolean cancelSwayIfDisabled(MatrixStack instance, Quaternionfc quaternion) {
-        ViewmodelFeature vm = Managers.FEATURE.getFeatureFromClass(ViewmodelFeature.class);
+        ViewModelFeature vm = Managers.FEATURE.getFeatureFromClass(ViewModelFeature.class);
         return vm == null || vm.sway.getValue();
     }
 
