@@ -134,7 +134,7 @@ public class NotificationsFeature extends Feature {
             if (iconUrl == null) return;
 
             Image image = Toolkit.getDefaultToolkit().createImage(iconUrl);
-            PopupMenu popup = new PopupMenu(); // обязательно!
+            PopupMenu popup = new PopupMenu();
             TrayIcon trayIcon = new TrayIcon(image, "", popup);
             trayIcon.setImageAutoSize(true);
 
