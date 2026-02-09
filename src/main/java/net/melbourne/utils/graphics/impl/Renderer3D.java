@@ -14,7 +14,6 @@ import net.minecraft.client.util.BufferAllocator;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Box;
-import org.jetbrains.annotations.NotNull;
 import org.joml.*;
 import org.lwjgl.opengl.GL11;
 
@@ -23,7 +22,6 @@ import java.lang.Math;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
-
 
 public class Renderer3D implements Globals
 {

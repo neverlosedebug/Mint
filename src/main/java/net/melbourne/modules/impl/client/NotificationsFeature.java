@@ -31,9 +31,9 @@ public class NotificationsFeature extends Feature {
 
     // хуйню сморозил // chatmentions ващето имбу
     public final BooleanSetting windowsNotifs = new BooleanSetting("WindowsNotifications", "Enable system tray notifications when the game is unfocused.", false);
-    public final BooleanSetting chatMentions = new BooleanSetting("ChatMentions", "Notify when mentioned in chat.", true, () -> windowsNotifs.getValue());
-    public final BooleanSetting visualRange = new BooleanSetting("VisualRange", "Notify when a player enters render distance.", false, () -> windowsNotifs.getValue());
-    public final BooleanSetting includeFriends = new BooleanSetting("IncludeFriends", "Also notify for friends entering range.", false, () -> visualRange.getValue() && windowsNotifs.getValue());
+    public final BooleanSetting chatMentions = new BooleanSetting("ChatMentions", "Notify when mentioned in chat.", true);
+    public final BooleanSetting visualRange = new BooleanSetting("VisualRange", "Notify when a player enters render distance.", false);
+    public final BooleanSetting includeFriends = new BooleanSetting("IncludeFriends", "Also notify for friends entering range.", false, () -> visualRange.getValue());
 
     @SubscribeEvent
     public void onPacketReceive(PacketEvent.Receive event) {
