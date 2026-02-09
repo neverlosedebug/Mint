@@ -1,6 +1,7 @@
 package net.melbourne.modules.impl.client;
 
 import net.melbourne.Managers;
+import net.melbourne.events.impl.PacketEvent;
 import net.melbourne.services.Services;
 import net.melbourne.events.SubscribeEvent;
 import net.melbourne.events.impl.PlayerDeathEvent;
@@ -14,6 +15,7 @@ import net.melbourne.settings.types.NumberSetting;
 import net.melbourne.utils.miscellaneous.ColorUtils;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.network.packet.s2c.play.GameMessageS2CPacket;
 import net.minecraft.text.Text;
 
 import java.awt.*;
@@ -27,10 +29,30 @@ public class NotificationsFeature extends Feature {
     public final BooleanSetting pingSpike = new BooleanSetting("LatencySpike", "Detects sudden latency increases.", true);
     public final NumberSetting spikeThreshold = new NumberSetting("LatencyThreshold", "Ping increase required to trigger.", 100, 1, 500, () -> pingSpike.getValue());
 
-    // хуйню сморозил
+    // хуйню сморозил // chatmentions ващето имбу
     public final BooleanSetting windowsNotifs = new BooleanSetting("WindowsNotifications", "Enable system tray notifications when the game is unfocused.", false);
+    public final BooleanSetting chatMentions = new BooleanSetting("ChatMentions", "Notify when mentioned in chat.", true, () -> windowsNotifs.getValue());
     public final BooleanSetting visualRange = new BooleanSetting("VisualRange", "Notify when a player enters render distance.", false, () -> windowsNotifs.getValue());
     public final BooleanSetting includeFriends = new BooleanSetting("IncludeFriends", "Also notify for friends entering range.", false, () -> visualRange.getValue() && windowsNotifs.getValue());
+
+    @SubscribeEvent
+    public void onPacketReceive(PacketEvent.Receive event) {
+        if (getNull() || !windowsNotifs.getValue() || !chatMentions.getValue()) return;
+        if (mc.isWindowFocused()) return;
+        if (!(event.getPacket() instanceof GameMessageS2CPacket packet)) return;
+
+        Text messageText = packet.content();
+        if (messageText == null) return;
+
+        String message = messageText.getString();
+        String selfName = mc.player.getName().getString();
+
+        if (message.startsWith("<" + selfName + ">")) return;
+
+        if (message.contains(selfName)) {
+            sendWindowsNotification("You were mentioned in chat", message, TrayIcon.MessageType.INFO);
+        }
+    }
 
     @SubscribeEvent
     public void onPlayerPop(PlayerPopEvent event) {
@@ -103,7 +125,7 @@ public class NotificationsFeature extends Feature {
         sendWindowsNotification(playerName + " entered visual range", "", TrayIcon.MessageType.INFO);
     }
 
-    // иди нахуй // todo
+    // иди нахуй
     private void sendWindowsNotification(String title, String message, TrayIcon.MessageType type) {
         try {
             if (!SystemTray.isSupported()) return;
