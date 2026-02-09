@@ -66,7 +66,10 @@ public class Window {
             targetY += button.getHeight();
         }
 
-        float scale = Easing.ease(Easing.toDelta(openTime, 150), Easing.Method.EASE_OUT_CUBIC);
+        ClickGuiFeature clickGui = Managers.FEATURE.getFeatureFromClass(ClickGuiFeature.class);
+        float animDuration = clickGui.animationSpeed.getValue().floatValue();
+        float scale = Easing.ease(Easing.toDelta(openTime, (int) animDuration), Easing.Method.EASE_OUT_CUBIC);
+
         if (open || scale != 1.0f) {
             if (scale != 1.0f)
                 context.enableScissor((int) x, (int) (y + height), (int) (x + width), (int) (y + height + (targetY * (open ? scale : 1.0f - scale)) + 2));
@@ -74,7 +77,6 @@ public class Window {
             context.getMatrices().pushMatrix();
             context.getMatrices().translate(0, -targetY + (targetY * (open ? scale : 1.0f - scale)));
 
-            ClickGuiFeature clickGui = Managers.FEATURE.getFeatureFromClass(ClickGuiFeature.class);
             Color bg = clickGui.backgroundColor.getColor();
             Renderer2D.renderQuad(context, x, y + height, x + width, y + currentY + 1, bg);
 

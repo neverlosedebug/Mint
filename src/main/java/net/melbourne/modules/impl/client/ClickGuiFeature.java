@@ -6,6 +6,7 @@ import net.melbourne.modules.Feature;
 import net.melbourne.modules.FeatureInfo;
 import net.melbourne.settings.types.BooleanSetting;
 import net.melbourne.settings.types.ColorSetting;
+import net.melbourne.settings.types.NumberSetting;
 import org.lwjgl.glfw.GLFW;
 
 import java.awt.*;
@@ -15,6 +16,7 @@ public class ClickGuiFeature extends Feature {
     public BooleanSetting sounds = new BooleanSetting("Sounds", "Custom sounds when enabling or disabling modules.", false);
     public BooleanSetting outline = new BooleanSetting("Outline", "Enable window outline.", true);
     public ColorSetting backgroundColor = new ColorSetting("Background", "GUI background color.", new Color(30, 30, 30, 150));
+    public NumberSetting animationSpeed = new NumberSetting("Anim Speed", "Window open/close animation speed (ms).", 150, 50, 500);
 
     @Override
     public void onEnable() {
