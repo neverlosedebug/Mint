@@ -19,8 +19,8 @@ repositories {
         url = "https://maven.meteordev.org/releases"
     }
     maven {
-        name = "meteor-maven"
-        url = "https://maven.meteordev.org"
+        name = "meteor-maven-snapshots"
+        url = "https://maven.meteordev.org/snapshots"
     }
     mavenCentral()
 }
@@ -30,13 +30,13 @@ dependencies {
     mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
     modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+
     implementation(shadow("org.luaj:luaj-jse:3.0.1"))
     implementation(shadow("org.reflections:reflections:0.10.2"))
     implementation(shadow("meteordevelopment:discord-ipc:1.1"))
 
     implementation(shadow("org.bouncycastle:bcprov-jdk18on:1.78.1"))
     implementation(shadow("org.bouncycastle:bcpkix-jdk18on:1.78.1"))
-
 }
 
 def getCommitHash = { ->
@@ -51,7 +51,6 @@ def getRevisionCount = { ->
     return gitProcess.text.trim()
 }
 
-
 buildConfig {
     className("BuildConstants")
     packageName(group)
@@ -64,16 +63,16 @@ buildConfig {
 processResources {
     inputs.properties([
             "version": version,
-            "minecraft_version": minecraft_version,
-            "loader_version": loader_version
+            "minecraft_version": project.minecraft_version,
+            "loader_version": project.loader_version
     ])
     filteringCharset = "UTF-8"
 
     filesMatching("fabric.mod.json") {
         expand([
                 "version": version,
-                "minecraft_version": minecraft_version,
-                "loader_version": loader_version
+                "minecraft_version": project.minecraft_version,
+                "loader_version": project.loader_version
         ])
     }
 }
@@ -87,24 +86,26 @@ loom {
 }
 
 java {
-    withSourcesJar()
-
     sourceCompatibility = JavaVersion.VERSION_21
     targetCompatibility = JavaVersion.VERSION_21
 }
 
 jar {
-    from("LICENSE") {
-        rename { "${it}_${project.base.archivesName.get()}"}
-    }
+    enabled = false
 }
 
 shadowJar {
     configurations = [project.configurations.shadow]
-    archiveClassifier.set("dev")
+    archiveClassifier = ''
 }
 
 remapJar {
     dependsOn(shadowJar)
-    inputFile = tasks.shadowJar.archiveFile
+    inputFile = shadowJar.archiveFile
+    archiveClassifier = ''
+    archiveFileName = "${archives_base_name}-${version}.jar"
+}
+
+tasks.build {
+    dependsOn(remapJar)
 }
