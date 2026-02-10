@@ -37,6 +37,7 @@ import net.minecraft.entity.effect.StatusEffectUtil;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.MathHelper;
@@ -316,37 +317,50 @@ public class HudFeature extends Feature {
     public void renderHud(RenderHudEvent event) {
         if (mc.player == null) return;
         if (watermark.getValue()) {
-            StringBuilder sb = new StringBuilder();
+            MutableText text = Text.empty();
 
-            if (showClientName.getValue()) {
-                sb.append(Melbourne.NAME);
+            boolean hasName = showClientName.getValue();
+            boolean hasVersionInfo = (showVersion.getValue() && !Melbourne.MOD_VERSION.isEmpty())
+                    || (showRevision.getValue() && !Melbourne.GIT_REVISION.isEmpty())
+                    || (showHash.getValue() && !Melbourne.GIT_HASH.isEmpty());
+
+            if (hasName) {
+                text.append(Text.literal(Melbourne.NAME));
             }
 
-            boolean hasVersionPart = false;
-            if (showVersion.getValue()) {
-                if (sb.length() > 0) sb.append(" - ");
-                sb.append("v").append(Melbourne.MOD_VERSION);
-                hasVersionPart = true;
-            }
-
-            StringBuilder suffix = new StringBuilder();
-            if (showRevision.getValue() && !Melbourne.GIT_REVISION.isEmpty()) {
-                suffix.append(Melbourne.GIT_REVISION);
-            }
-            if (showHash.getValue() && !Melbourne.GIT_HASH.isEmpty()) {
-                if (suffix.length() > 0) suffix.append(".");
-                suffix.append(Melbourne.GIT_HASH);
-            }
-
-            if (suffix.length() > 0) {
-                if (!hasVersionPart && sb.length() > 0) {
-                    sb.append(" - ");
+            if (hasVersionInfo) {
+                if (hasName) {
+                    text.append(Text.literal(" - ").formatted(Formatting.GRAY));
                 }
-                sb.append("+").append(suffix);
+
+                StringBuilder versionPart = new StringBuilder();
+                if (showVersion.getValue()) {
+                    versionPart.append("v").append(Melbourne.MOD_VERSION);
+                }
+
+                StringBuilder suffix = new StringBuilder();
+                if (showRevision.getValue() && !Melbourne.GIT_REVISION.isEmpty()) {
+                    suffix.append(Melbourne.GIT_REVISION);
+                }
+                if (showHash.getValue() && !Melbourne.GIT_HASH.isEmpty()) {
+                    if (suffix.length() > 0) suffix.append(".");
+                    suffix.append(Melbourne.GIT_HASH);
+                }
+
+                if (suffix.length() > 0) {
+                    if (versionPart.length() > 0) {
+                        versionPart.append("+").append(suffix);
+                    } else {
+                        versionPart.append("+").append(suffix);
+                    }
+                }
+
+                if (versionPart.length() > 0) {
+                    text.append(Text.literal(versionPart.toString()).formatted(Formatting.WHITE));
+                }
             }
 
-            if (sb.length() > 0) {
-                Text text = Text.literal(sb.toString());
+            if (!text.getString().isEmpty()) {
                 drawHudText(event.getContext(), text, 1, 1);
             }
         }
