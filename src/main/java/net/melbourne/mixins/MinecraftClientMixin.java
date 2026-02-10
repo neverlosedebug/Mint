@@ -69,7 +69,6 @@ public abstract class MinecraftClientMixin {
         return original;
     }
 
-
     @ModifyExpressionValue(method = "doItemUse", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayerInteractionManager;isBreakingBlock()Z"))
     private boolean handleInputEvents(boolean original) {
         if (Managers.FEATURE.getFeatureFromClass(MultiTaskFeature.class).isEnabled())

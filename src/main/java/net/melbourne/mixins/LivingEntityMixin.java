@@ -80,7 +80,6 @@ public abstract class LivingEntityMixin extends Entity implements Globals {
         }
     }
 
-
     @Inject(method = "getStepHeight", at = @At("RETURN"), cancellable = true)
     private void onGetStepHeight(CallbackInfoReturnable<Float> cir) {
         if ((Object) this == mc.player) {

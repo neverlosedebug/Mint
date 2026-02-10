@@ -22,7 +22,6 @@ import net.minecraft.world.BlockView;
 import net.minecraft.world.Difficulty;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.attribute.EntityAttributes;
-import net.minecraft.registry.RegistryKeys;
 
 import static net.melbourne.utils.entity.DamageUtils.PROTECTION_MAP;
 

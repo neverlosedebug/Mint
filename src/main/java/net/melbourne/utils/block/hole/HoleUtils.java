@@ -108,8 +108,6 @@ public class HoleUtils implements Globals {
         return new Hole(new Box(pos.getX(), pos.getY(), pos.getZ(), pos.getX() + 1, pos.getY() + height, pos.getZ() + 1), HoleType.INCOMPLETE, HoleSafety.OBSIDIAN);
     }
 
-
-
     public static List<Hole> getHoles(PlayerEntity player, float range, boolean singles, boolean doubles, boolean quads, boolean ignoreOwn, boolean requireReachable) {
         BlockPos center = PositionUtils.getFlooredPosition(player);
         List<Hole> holes = new ArrayList<>();
@@ -368,8 +366,6 @@ public class HoleUtils implements Globals {
         return new Hole(box, HoleType.DOUBLE, safety);
     }
 
-
-
     public static Hole getQuadHole(BlockPos pos, double height) {
         if (mc.world == null || pos == null) return null;
 
@@ -401,8 +397,6 @@ public class HoleUtils implements Globals {
 
         return new Hole(new Box(pos.getX(), pos.getY(), pos.getZ(), pos.getX() + 2, pos.getY() + height, pos.getZ() + 2), HoleType.QUAD, safety);
     }
-
-
 
     public record Hole(Box box, HoleType type, HoleSafety safety) {}
     public enum HoleType { SINGLE, DOUBLE, QUAD, INCOMPLETE }

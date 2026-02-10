@@ -8,7 +8,6 @@ import org.luaj.vm2.LuaValue;
 import org.luaj.vm2.lib.ThreeArgFunction;
 import org.luaj.vm2.lib.ZeroArgFunction;
 
-
 @RegisterLua
 public class PositionFunction extends MinecraftBase
 {
@@ -55,5 +54,4 @@ public class PositionFunction extends MinecraftBase
 			}
 		});
 	}
-
 }

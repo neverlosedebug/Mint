@@ -44,5 +44,4 @@ public class MouseMixin implements Globals {
         if (window == mc.getWindow().getHandle() && action == 1 && mc.currentScreen == null)
             Melbourne.EVENT_HANDLER.post(new MouseEvent(button));
     }
-
 }

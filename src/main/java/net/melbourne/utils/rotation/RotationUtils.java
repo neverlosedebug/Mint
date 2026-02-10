@@ -1,6 +1,5 @@
 package net.melbourne.utils.rotation;
 
-
 import net.melbourne.utils.Globals;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.math.MathHelper;

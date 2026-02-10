@@ -32,5 +32,4 @@ public class SoundUtils {
             IOUtils.closeQuietly(inputStream);
         }
     }
-
 }

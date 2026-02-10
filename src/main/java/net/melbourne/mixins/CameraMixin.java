@@ -33,5 +33,4 @@ public class CameraMixin {
         if (Managers.FEATURE.getFeatureFromClass(ViewClipFeature.class).isEnabled())
             info.setReturnValue(f);
     }
-
 }

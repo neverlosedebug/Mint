@@ -33,6 +33,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(ClientPlayerEntity.class)
 public abstract class ClientPlayerEntityMixin extends AbstractClientPlayerEntity implements Globals {
+
     @Shadow private double lastXClient;
     @Shadow private double lastYClient;
     @Shadow private double lastZClient;
@@ -82,7 +83,6 @@ public abstract class ClientPlayerEntityMixin extends AbstractClientPlayerEntity
         Services.ROTATION.update();
     }
 
-
     @Inject(method = "move", at = @At("HEAD"), cancellable = true)
     private void move(MovementType movementType, Vec3d movement, CallbackInfo info) {
         MoveEvent event = new MoveEvent(movementType, movement);
@@ -106,7 +106,6 @@ public abstract class ClientPlayerEntityMixin extends AbstractClientPlayerEntity
             info.cancel();
         }
     }
-
 
     @Inject(method = "applyMovementSpeedFactors", at = @At("HEAD"), cancellable = true)
     private void onApplyMove(Vec2f input, CallbackInfoReturnable<Vec2f> cir) {
@@ -149,8 +148,6 @@ public abstract class ClientPlayerEntityMixin extends AbstractClientPlayerEntity
             info.cancel();
         }
     }
-
-
 
     @ModifyExpressionValue(method = "canStartSprinting", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayerEntity;isUsingItem()Z"))
     private boolean canStartSprinting$isUsingItem(boolean original) {

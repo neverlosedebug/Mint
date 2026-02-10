@@ -4,7 +4,6 @@ import net.melbourne.Managers;
 import net.melbourne.modules.impl.misc.NameProtectFeature;
 import net.melbourne.utils.Globals;
 import net.melbourne.utils.miscellaneous.ColorUtils;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.CharacterVisitor;
 import net.minecraft.text.Style;
 import net.minecraft.text.TextVisitFactory;

@@ -10,7 +10,6 @@ import org.joml.Matrix3x2f;
 
 import java.awt.*;
 
-
 public record SidewaysGradientElement(RenderPipeline pipelines, TextureSetup textureSetup, Matrix3x2f matrix3x2f,
                           float left, float top, float right, float bottom,  Color startColor, Color endColor,
                           @Nullable ScreenRect scissorArea, @Nullable ScreenRect bounds)

@@ -5,7 +5,6 @@ import net.melbourne.modules.impl.movement.StepFeature;
 import net.melbourne.utils.Globals;
 import net.minecraft.block.*;
 import net.minecraft.block.enums.SlabType;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.registry.tag.FluidTags;
 import net.minecraft.util.function.BooleanBiFunction;
 import net.minecraft.util.math.BlockPos;

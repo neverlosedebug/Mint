@@ -1,6 +1,5 @@
 package net.melbourne.commands.impl;
 
-import net.melbourne.Manager;
 import net.melbourne.Managers;
 import net.melbourne.commands.Command;
 import net.melbourne.commands.CommandInfo;

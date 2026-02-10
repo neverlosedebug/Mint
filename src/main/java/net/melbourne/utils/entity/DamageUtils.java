@@ -30,7 +30,6 @@ import net.minecraft.world.GameMode;
 import java.util.HashMap;
 import java.util.Map;
 
-
 public class DamageUtils implements Globals
 {
     public static final Map<String, Integer> PROTECTION_MAP = new HashMap<>() {{

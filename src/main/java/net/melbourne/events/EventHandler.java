@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public final class EventHandler
+
 {
 
     private final MethodHandles.Lookup lookup = MethodHandles.lookup();

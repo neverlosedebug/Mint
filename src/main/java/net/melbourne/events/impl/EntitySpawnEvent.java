@@ -5,7 +5,6 @@ import lombok.Getter;
 import net.melbourne.events.Event;
 import net.minecraft.entity.Entity;
 
-
 @AllArgsConstructor
 @Getter
 public class EntitySpawnEvent extends Event {

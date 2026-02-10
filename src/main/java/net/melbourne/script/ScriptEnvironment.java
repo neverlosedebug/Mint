@@ -3,7 +3,6 @@ package net.melbourne.script;
 import org.luaj.vm2.Globals;
 import org.luaj.vm2.LuaTable;
 
-
 public class ScriptEnvironment
 {
 
@@ -16,5 +15,4 @@ public class ScriptEnvironment
 			globals.set(provider.getName(), table);
 		}
 	}
-
 }

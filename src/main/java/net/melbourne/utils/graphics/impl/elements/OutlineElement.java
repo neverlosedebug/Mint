@@ -10,7 +10,6 @@ import org.joml.Matrix3x2f;
 
 import java.awt.*;
 
-
 public record OutlineElement(RenderPipeline pipelines, TextureSetup textureSetup, Matrix3x2f matrix3x2f,
                           float left, float top, float right, float bottom, Color color,
                           @Nullable ScreenRect scissorArea, @Nullable ScreenRect bounds)
@@ -86,4 +85,3 @@ public record OutlineElement(RenderPipeline pipelines, TextureSetup textureSetup
 		return scissorArea != null ? scissorArea.intersection(screenRect) : screenRect;
 	}
 }
-

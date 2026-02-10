@@ -5,7 +5,6 @@ import lombok.Getter;
 import net.melbourne.events.Event;
 import net.melbourne.settings.Setting;
 
-
 @Getter
 @AllArgsConstructor
 public class SettingChangeEvent extends Event

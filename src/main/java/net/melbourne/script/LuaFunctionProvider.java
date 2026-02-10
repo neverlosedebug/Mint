@@ -2,7 +2,6 @@ package net.melbourne.script;
 
 import org.luaj.vm2.LuaTable;
 
-
 public interface LuaFunctionProvider
 {
 

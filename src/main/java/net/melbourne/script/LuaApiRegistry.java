@@ -7,7 +7,6 @@ import org.luaj.vm2.LuaTable;
 import java.util.ArrayList;
 import java.util.List;
 
-
 @Getter
 public class LuaApiRegistry
 {
@@ -28,5 +27,4 @@ public class LuaApiRegistry
 			globals.set(provider.getName(), table);
 		}
 	}
-
 }

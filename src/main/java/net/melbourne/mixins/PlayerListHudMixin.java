@@ -57,4 +57,3 @@ public class PlayerListHudMixin implements Globals {
         }
     }
 }
-

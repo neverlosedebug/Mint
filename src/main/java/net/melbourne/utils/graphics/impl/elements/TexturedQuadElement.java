@@ -8,7 +8,6 @@ import net.minecraft.client.texture.TextureSetup;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix3x2f;
 
-
 public record TexturedQuadElement(RenderPipeline pipeline, TextureSetup textureSetup, Matrix3x2f pose, int x1, int y1, int x2, int y2,
                                   float u1, float u2, float v1, float v2, int color, @Nullable ScreenRect scissorArea, @Nullable ScreenRect bounds)
 		implements SimpleGuiElementRenderState

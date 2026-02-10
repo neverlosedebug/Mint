@@ -11,7 +11,6 @@ import org.joml.Matrix3x2f;
 
 import java.awt.*;
 
-
 public class Renderer2D implements Globals
 {
 
@@ -68,6 +67,4 @@ public class Renderer2D implements Globals
 				(int) right, (int) bottom,
 				0.0f, 1.0f, 0.0f, 1.0f, color.getRGB(), context.scissorStack.peekLast()));
 	}
-
-
 }

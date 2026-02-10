@@ -21,6 +21,7 @@ import java.util.List;
 
 @Getter
 public class GlyphMap {
+
     private final Font[] fonts;
     private final char include;
     private final char exclude;

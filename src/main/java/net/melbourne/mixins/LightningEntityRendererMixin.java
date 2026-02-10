@@ -2,7 +2,6 @@ package net.melbourne.mixins;
 
 import net.melbourne.Managers;
 import net.melbourne.modules.impl.render.KillEffectsFeature;
-import net.melbourne.modules.impl.render.ParticlesFeature;
 import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.entity.LightningEntityRenderer;
 import org.joml.Matrix4f;

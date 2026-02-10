@@ -9,7 +9,6 @@ import java.lang.invoke.MethodType;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 
-
 @Getter
 public final class SubscribableTarget
 {

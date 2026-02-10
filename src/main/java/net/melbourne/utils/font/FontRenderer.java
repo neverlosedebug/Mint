@@ -31,6 +31,7 @@ import java.util.Map;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class FontRenderer implements Closeable, Globals {
+
     private final Map<GpuTextureView, ObjectList<DrawEntry>> glyphPages = new HashMap<>();
     private final ObjectList<GlyphMap> maps = new ObjectArrayList<>();
     private final float size;
@@ -59,16 +60,13 @@ public class FontRenderer implements Closeable, Globals {
         init(fonts, size);
     }
 
-    public static String stripControlCodes(String text)
-    {
+    public static String stripControlCodes(String text) {
         char[] chars = text.toCharArray();
         StringBuilder builder = new StringBuilder();
 
-        for (int i = 0; i < chars.length; i++)
-        {
-            char character = chars[ i ];
-            if (character == '§')
-            {
+        for (int i = 0; i < chars.length; i++) {
+            char character = chars[i];
+            if (character == '§') {
                 i++;
                 continue;
             }
@@ -89,8 +87,7 @@ public class FontRenderer implements Closeable, Globals {
             init(this.fonts, this.size);
         }
 
-        if (Managers.FEATURE != null && Managers.FEATURE.getFeatureFromClass(FontFeature.class).isEnabled())
-        {
+        if (Managers.FEATURE != null && Managers.FEATURE.getFeatureFromClass(FontFeature.class).isEnabled()) {
             x += Managers.FEATURE.getFeatureFromClass(FontFeature.class).xOffset.getValue().floatValue();
             y += Managers.FEATURE.getFeatureFromClass(FontFeature.class).yOffset.getValue().floatValue() - 2;
         }
@@ -184,8 +181,7 @@ public class FontRenderer implements Closeable, Globals {
             init(this.fonts, this.size);
         }
 
-        if (Managers.FEATURE != null && Managers.FEATURE.getFeatureFromClass(FontFeature.class).isEnabled())
-        {
+        if (Managers.FEATURE != null && Managers.FEATURE.getFeatureFromClass(FontFeature.class).isEnabled()) {
             x += Managers.FEATURE.getFeatureFromClass(FontFeature.class).xOffset.getValue().floatValue();
             y += Managers.FEATURE.getFeatureFromClass(FontFeature.class).yOffset.getValue().floatValue() - 2;
         }
@@ -267,7 +263,6 @@ public class FontRenderer implements Closeable, Globals {
 
         context.getMatrix().pop();
     }
-
 
     public float getTextWidth(String text) {
         char[] characters = stripControlCodes(text).toCharArray();
@@ -364,8 +359,7 @@ public class FontRenderer implements Closeable, Globals {
         }
     }
 
-    public record DrawEntry(float atX, float atY, float r, float g, float b, GlyphMap.Glyph toDraw)
-    {
+    public record DrawEntry(float atX, float atY, float r, float g, float b, GlyphMap.Glyph toDraw) {
 
     }
 }

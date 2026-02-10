@@ -22,6 +22,7 @@ public class MacroManager extends Manager {
     @Override
     public void onInit() {
         loadMacros();
+
         // stupid, replace ts
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             MacroHandler.tick();

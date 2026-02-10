@@ -4,7 +4,6 @@ import net.melbourne.script.LuaFunctionProvider;
 import net.melbourne.utils.Globals;
 import org.luaj.vm2.LuaTable;
 
-
 public abstract class MinecraftBase implements LuaFunctionProvider, Globals
 {
 

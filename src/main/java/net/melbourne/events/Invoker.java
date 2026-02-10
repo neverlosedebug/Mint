@@ -2,7 +2,6 @@ package net.melbourne.events;
 
 import java.lang.reflect.Method;
 
-
 @FunctionalInterface
 public interface Invoker
 {

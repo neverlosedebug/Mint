@@ -7,7 +7,6 @@ import net.melbourne.utils.Globals;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.client.MinecraftClient;
 
 import java.util.*;
 

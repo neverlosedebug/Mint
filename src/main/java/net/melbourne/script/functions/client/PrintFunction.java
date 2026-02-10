@@ -7,7 +7,6 @@ import org.luaj.vm2.LuaTable;
 import org.luaj.vm2.LuaValue;
 import org.luaj.vm2.lib.OneArgFunction;
 
-
 @RegisterLua
 public class PrintFunction implements LuaFunctionProvider
 {
@@ -31,5 +30,4 @@ public class PrintFunction implements LuaFunctionProvider
 			}
 		});
 	}
-
 }

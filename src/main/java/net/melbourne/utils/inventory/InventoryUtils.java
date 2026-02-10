@@ -12,7 +12,6 @@ import net.minecraft.client.gui.screen.ingame.ShulkerBoxScreen;
 
 import static net.melbourne.utils.Globals.mc;
 
-
 public class InventoryUtils {
 
     public static int indexToSlot(int index) {

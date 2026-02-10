@@ -90,7 +90,6 @@ public class WorldUtils implements Globals {
         return null;
     }
 
-
     public static List<Direction> getStrictDirections(Vec3d eyePos, Vec3d blockPos) {
         List<Direction> directions = new ArrayList<>();
 

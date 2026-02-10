@@ -4,7 +4,6 @@ import lombok.Getter;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.util.math.MatrixStack;
 
-
 @Getter
 public class WorldContext
 {
@@ -16,5 +15,4 @@ public class WorldContext
 		this.matrix = stack;
 		this.buffer = buffer;
 	}
-
 }

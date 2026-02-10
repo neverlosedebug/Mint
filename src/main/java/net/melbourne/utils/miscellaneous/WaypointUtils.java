@@ -33,6 +33,7 @@ import java.util.Map;
 import java.util.UUID;
 
 public class WaypointUtils {
+
     private static final List<LogoutSpot> logoutSpots = new ArrayList<>();
     private static final List<PingSpot> pingSpots = new ArrayList<>();
     private static final Map<UUID, Integer> totemPops = new HashMap<>();

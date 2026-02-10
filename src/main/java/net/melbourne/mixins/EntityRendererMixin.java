@@ -3,7 +3,6 @@ package net.melbourne.mixins;
 import net.melbourne.Managers;
 import net.melbourne.modules.impl.render.NametagsFeature;
 import net.minecraft.client.render.entity.EntityRenderer;
-import net.minecraft.client.render.entity.state.EntityRenderState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.text.Text;

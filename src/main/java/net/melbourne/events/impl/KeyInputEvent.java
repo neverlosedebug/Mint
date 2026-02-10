@@ -1,6 +1,5 @@
 package net.melbourne.events.impl;
 
-
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import net.melbourne.events.Event;

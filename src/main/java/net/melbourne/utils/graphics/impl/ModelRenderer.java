@@ -23,6 +23,7 @@ import org.joml.Vector4f;
 import java.awt.*;
 
 public class ModelRenderer implements Globals {
+
     private static Render render;
     private static Matrix4f modelMatrix;
     private static Vec3d entityPos;

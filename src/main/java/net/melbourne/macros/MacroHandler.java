@@ -2,7 +2,6 @@ package net.melbourne.macros;
 
 import net.melbourne.Managers;
 import net.melbourne.utils.Globals;
-import net.minecraft.client.MinecraftClient;
 import org.lwjgl.glfw.GLFW;
 
 public class MacroHandler implements Globals {

@@ -62,5 +62,4 @@ public class KeyboardInputMixin extends Input implements Globals {
 
         return positive ? 1.0f : -1.0f;
     }
-
 }

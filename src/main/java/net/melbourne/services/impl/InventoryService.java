@@ -182,7 +182,7 @@ public class InventoryService extends Service implements Globals {
     }
 
 
-    /*==== Finders ====*/
+    /*==== Finders ====*/ // from neverlosedebug: lel Mint chatgpt code =)
 
 
     public boolean isPresent(SearchLogic logic, Block... blocks) {
@@ -360,5 +360,4 @@ public class InventoryService extends Service implements Globals {
         int slot = mc.player.getInventory().getSelectedSlot() + 1;
         return slot < 9 ? slot : 0;
     }
-
 }

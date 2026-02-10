@@ -1,10 +1,8 @@
 package net.melbourne.mixins;
 
-import net.melbourne.Managers;
 import net.melbourne.Melbourne;
 import net.melbourne.events.impl.PlayerMineEvent;
 import net.minecraft.entity.player.BlockBreakingInfo;
-import net.minecraft.util.math.BlockPos;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;

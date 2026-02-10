@@ -11,7 +11,6 @@ import net.minecraft.entity.player.BlockBreakingInfo;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.packet.s2c.play.BlockBreakingProgressS2CPacket;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
 
 import java.util.Collections;
 import java.util.HashMap;

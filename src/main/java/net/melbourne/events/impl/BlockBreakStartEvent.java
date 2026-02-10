@@ -10,7 +10,7 @@ import net.minecraft.util.math.Direction;
 
 /**
  * Fired when the player starts breaking a block (left-click / mining).
- * The event is cancelable – if cancelled the client will not send the
+ * The event is cancelable – if canceled the client will not send the
  * START_DESTROY_BLOCK packet.
  */
 @AllArgsConstructor

@@ -153,5 +153,4 @@ public abstract class LightmapTextureManagerMixin {
             ci.cancel();
         }
     }
-
 }
