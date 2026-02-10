@@ -23,7 +23,7 @@ public class EngineFeature extends Feature {
 
     public WhitelistSetting socials = new WhitelistSetting("Socials", "Social checks to respect.", WhitelistSetting.Type.CUSTOM, new String[]{"Friends"}, new String[]{"Friends", "Teams"});
     public WhitelistSetting predictions = new WhitelistSetting("Predictions", "Types of predictions to calculate.", WhitelistSetting.Type.CUSTOM, new String[]{"Mining"}, new String[]{"Mining", "Movement"});
-    public ModeSetting breakingMode = new ModeSetting("Breaking", "Calculation logic for mining simulation.", "Generic", new String[]{"Generic", "Compute"}, () -> predictions.getWhitelistIds().contains("Mining"));
+    public ModeSetting breakingMode = new ModeSetting("Breaking", "Calculation logic for mining simulation.", "Generic", new String[]{"Generic", "Compute"}, () -> predictions.getWhitelistIds().contains("Mining"));  // cyka
     public NumberSetting magnitude = new NumberSetting("Magnitude", "How much to scale the predicted movement vector.", 100, 50, 300, () -> predictions.getWhitelistIds().contains("Movement"));
     public ModeSetting incompleteMode = new ModeSetting("Incompletes", "Mode for incomplete hole detection.", "Above", new String[]{"Above", "Normal"});
 
@@ -44,7 +44,15 @@ public class EngineFeature extends Feature {
                     double rangeSq = MathHelper.square(autoMine.range.getValue().floatValue());
                     if (mc.player.squaredDistanceTo(player) > rangeSq) continue;
 
-                    BlockPos predicted = Services.SIMULATION.predictMiningTarget(player);
+                    BlockPos predicted = null;
+                    String mode = breakingMode.getValue();
+
+                    if ("Generic".equals(mode)) {
+                        predicted = Services.SIMULATION.predictMiningTarget(player);
+                    } else if ("Compute".equals(mode)) {
+                        predicted = computeAdvancedMiningTarget(player, autoMine);
+                    }
+
                     if (predicted != null) {
                         predictedPositions.add(predicted);
                     }
@@ -65,5 +73,20 @@ public class EngineFeature extends Feature {
 
     public Set<BlockPos> getPredictedPositions() {
         return predictedPositions;
+    }
+
+    private BlockPos computeAdvancedMiningTarget(PlayerEntity enemy, AutoMineFeature autoMine) {
+        java.util.List<BlockPos> candidates = new java.util.ArrayList<>();
+
+        candidates.addAll(Services.SIMULATION.getSimulatedSurround(enemy));
+        candidates.addAll(Services.SIMULATION.getSimulatedPath(enemy, autoMine));
+
+        for (BlockPos pos : candidates) {
+            if (Services.SIMULATION.canBeMined(pos, autoMine.range.getValue().floatValue())) {
+                return pos;
+            }
+        }
+
+        return null;
     }
 }

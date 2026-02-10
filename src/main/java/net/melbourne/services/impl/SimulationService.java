@@ -100,6 +100,10 @@ public class SimulationService extends Service {
         return list;
     }
 
+    public boolean canBeMined(BlockPos pos, float range) {
+        return Simulations.canBeMined(pos, range);
+    }
+
     public boolean isSelfPop(BlockPos crystalPos, float maxSelfDamage) {
         if (mc.player == null) return false;
         Vec3d crystalVec = crystalPos.toCenterPos().subtract(0, 0.5, 0);
