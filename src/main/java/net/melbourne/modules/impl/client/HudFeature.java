@@ -62,6 +62,10 @@ public class HudFeature extends Feature {
             });
 
     public BooleanSetting watermark = new BooleanSetting("Watermark", "Displays the clients logo on your screen.", true);
+    public BooleanSetting showClientName = new BooleanSetting("ShowClientName", "Show client name in watermark.", true, () -> watermark.getValue());
+    public BooleanSetting showVersion = new BooleanSetting("ShowVersion", "Show mod version in watermark.", true, () -> watermark.getValue());
+    public BooleanSetting showRevision = new BooleanSetting("ShowRevision", "Show git revision in watermark.", true, () -> watermark.getValue() && !Melbourne.GIT_REVISION.isEmpty());
+    public BooleanSetting showHash = new BooleanSetting("ShowHash", "Show git hash in watermark.", true, () -> watermark.getValue() && !Melbourne.GIT_HASH.isEmpty());
     public BooleanSetting moduleList = new BooleanSetting("ModuleList", "Displays a list of modules you have enabled.", true);
     public ModeSetting sortingMode = new ModeSetting("Sorting", "Mode", "Length", new String[]{"Length", "Alphabetical"}, () -> moduleList.getValue());
 
@@ -312,19 +316,39 @@ public class HudFeature extends Feature {
     public void renderHud(RenderHudEvent event) {
         if (mc.player == null) return;
         if (watermark.getValue()) {
-            String versionText = "v" + Melbourne.MOD_VERSION;
-            if (!Melbourne.GIT_REVISION.isEmpty() && !Melbourne.GIT_HASH.isEmpty()) {
-                versionText += "+" + Melbourne.GIT_REVISION + "." + Melbourne.GIT_HASH;
-            } else if (!Melbourne.GIT_REVISION.isEmpty()) {
-                versionText += "+" + Melbourne.GIT_REVISION;
-            } else if (!Melbourne.GIT_HASH.isEmpty()) {
-                versionText += "+" + Melbourne.GIT_HASH;
-            }
-            Text text = Text.literal(Melbourne.NAME)
-                    .append(Text.literal(" - ").formatted(Formatting.GRAY))
-                    .append(Text.literal(versionText).formatted(Formatting.WHITE));
+            StringBuilder sb = new StringBuilder();
 
-            drawHudText(event.getContext(), text, 1, 1);
+            if (showClientName.getValue()) {
+                sb.append(Melbourne.NAME);
+            }
+
+            boolean hasVersionPart = false;
+            if (showVersion.getValue()) {
+                if (sb.length() > 0) sb.append(" - ");
+                sb.append("v").append(Melbourne.MOD_VERSION);
+                hasVersionPart = true;
+            }
+
+            StringBuilder suffix = new StringBuilder();
+            if (showRevision.getValue() && !Melbourne.GIT_REVISION.isEmpty()) {
+                suffix.append(Melbourne.GIT_REVISION);
+            }
+            if (showHash.getValue() && !Melbourne.GIT_HASH.isEmpty()) {
+                if (suffix.length() > 0) suffix.append(".");
+                suffix.append(Melbourne.GIT_HASH);
+            }
+
+            if (suffix.length() > 0) {
+                if (!hasVersionPart && sb.length() > 0) {
+                    sb.append(" - ");
+                }
+                sb.append("+").append(suffix);
+            }
+
+            if (sb.length() > 0) {
+                Text text = Text.literal(sb.toString());
+                drawHudText(event.getContext(), text, 1, 1);
+            }
         }
 
         if (moduleList.getValue()) {
