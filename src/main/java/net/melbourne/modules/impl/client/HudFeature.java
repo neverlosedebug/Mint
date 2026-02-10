@@ -69,22 +69,17 @@ public class HudFeature extends Feature {
     public BooleanSetting showHash = new BooleanSetting("ShowHash", "Show git hash in watermark.", true, () -> watermark.getValue() && !Melbourne.GIT_HASH.isEmpty());
     public BooleanSetting moduleList = new BooleanSetting("ModuleList", "Displays a list of modules you have enabled.", true);
     public ModeSetting sortingMode = new ModeSetting("Sorting", "Mode", "Length", new String[]{"Length", "Alphabetical"}, () -> moduleList.getValue());
-
     public BooleanSetting coordinates = new BooleanSetting("Coordinates", "Displays your ingame world coordinates.", true);
     public BooleanSetting direction = new BooleanSetting("Direction", "Displays your ingame direction.", false);
     public BooleanSetting nether = new BooleanSetting("Nether", "Displays your coordinates if you were in the nether.", true, () -> coordinates.getValue());
-
     public BooleanSetting armor = new BooleanSetting("Armor", "Displays equipped armor and durability percentages.", true);
     public NumberSetting armorScale = new NumberSetting("ArmorScale", "Scale of text for armor percentage.", 0.7, 0.3, 1.0, () -> armor.getValue());
     public ColorSetting highDurabilityColor = new ColorSetting("ArmorHigh", "Color for high durability.", new Color(0, 255, 0), () -> armor.getValue());
     public ColorSetting lowDurabilityColor = new ColorSetting("ArmorLow", "Color for low durability.", new Color(255, 0, 0), () -> armor.getValue());
-
     public BooleanSetting armorWarning = new BooleanSetting("ArmorWarning", "Warns when armor durability is low.", true);
     public NumberSetting durabilityThreshold = new NumberSetting("DurabilityThreshold", "Percentage threshold for warnings.", 20, 1, 100, () -> armorWarning.getValue());
-
     public BooleanSetting potions = new BooleanSetting("Potions", "Displays a list of your potion effects.", false);
     public BooleanSetting mintUsername = new BooleanSetting("ClientInfo", "Displays your Mint username in the bottom-right.", true);
-
     public BooleanSetting fps = new BooleanSetting("FPS", "Displays your current FPS.", true);
     public BooleanSetting tps = new BooleanSetting("TPS", "Displays the servers current tickrate.", false);
     public BooleanSetting averageTps = new BooleanSetting("AverageTPS", "Displays additional average tickrate.", false, () -> tps.getValue());
@@ -94,11 +89,8 @@ public class HudFeature extends Feature {
     public BooleanSetting durability = new BooleanSetting("Durability", "Displays the durability of your held item.", false);
     public BooleanSetting pearlCooldown = new BooleanSetting("PearlCooldown", "Displays a timer with pearl cooldown.", true);
     public BooleanSetting serverLag = new BooleanSetting("ServerLag", "Displays lag timer.", true);
-
     public BooleanSetting chestCounter = new BooleanSetting("ChestCounter", "Displays the amount of loaded chests.", false);
-
     public ModeSetting healthBarMode = new ModeSetting("HealthBar", "Health bar above hotbar", "None", new String[]{"None", "Sync", "Dynamic"});
-
     public ModeSetting colorMode = new ModeSetting("ColorMode", "Mode", "Default", new String[]{"Default", "Wave", "Transition"});
     public ColorSetting secondColor = new ColorSetting("SecondColor", "Second color for transition.", new Color(255, 255, 255),
             () -> colorMode.getValue().equals("Transition"));
@@ -316,7 +308,9 @@ public class HudFeature extends Feature {
     @SubscribeEvent
     public void renderHud(RenderHudEvent event) {
         if (mc.player == null) return;
-        if (watermark.getValue()) {
+
+        float wmAlpha = watermarkAnim();
+        if (wmAlpha > 0 && watermark.getValue()) {
             MutableText text = Text.empty();
 
             boolean hasName = showClientName.getValue();
@@ -361,11 +355,12 @@ public class HudFeature extends Feature {
             }
 
             if (!text.getString().isEmpty()) {
-                drawHudText(event.getContext(), text, 1, 1);
+                drawHudText(event.getContext(), text, 1, 1, wmAlpha);
             }
         }
 
-        if (moduleList.getValue()) {
+        float mlAlpha = moduleListAnim();
+        if (mlAlpha > 0 && moduleList.getValue()) {
             float offset = 0;
             for (FeatureEntry entry : featureEntries) {
                 float width = entry.feature.isEnabled() ? FontUtils.getWidth(entry.text.getString()) + 1 : 0;
@@ -377,12 +372,13 @@ public class HudFeature extends Feature {
                     entry.feature.setNewEntry(false);
                 }
 
-                drawHudText(event.getContext(), entry.text, x, y);
+                drawHudText(event.getContext(), entry.text, x, y, mlAlpha);
                 offset += FontUtils.getHeight();
             }
         }
 
-        if (armor.getValue()) {
+        float armorAlpha = armorAnim();
+        if (armorAlpha > 0 && armor.getValue()) {
             float scale = armorScale.getValue().floatValue();
             int offset = 0;
             ItemStack[] armor = new ItemStack[]{mc.player.getEquippedStack(EquipmentSlot.FEET), mc.player.getEquippedStack(EquipmentSlot.LEGS), mc.player.getEquippedStack(EquipmentSlot.CHEST), mc.player.getEquippedStack(EquipmentSlot.HEAD)};
@@ -407,7 +403,7 @@ public class HudFeature extends Feature {
                     event.getContext().getMatrices().translate(x + 8 - (FontUtils.getWidth(text) * scale) / 2.0F, y - (6 * scale));
                     event.getContext().getMatrices().pushMatrix();
                     event.getContext().getMatrices().scale(scale, scale);
-                    FontUtils.drawTextWithShadow(event.getContext(), text, 0, 0, new Color(r, g, b));
+                    FontUtils.drawTextWithShadow(event.getContext(), text, 0, 0, new Color(r, g, b, (int)(255 * armorAlpha)));
                     event.getContext().getMatrices().popMatrix();
                     event.getContext().getMatrices().popMatrix();
                 }
@@ -415,7 +411,8 @@ public class HudFeature extends Feature {
             }
         }
 
-        if (!healthBarMode.getValue().equalsIgnoreCase("None")) {
+        float hbAlpha = healthBarAnim();
+        if (hbAlpha > 0 && !healthBarMode.getValue().equalsIgnoreCase("None")) {
             if (mc.player == null) return;
 
             float width = event.getContext().getScaledWindowWidth();
@@ -425,7 +422,7 @@ public class HudFeature extends Feature {
             float centerX = (width - maxBarWidth) / 2f;
             float y = (height + 10) / 2f;
 
-            Renderer2D.renderQuad(event.getContext(), centerX, y, centerX + maxBarWidth, y + barHeight, new Color(0, 0, 0, 100));
+            Renderer2D.renderQuad(event.getContext(), centerX, y, centerX + maxBarWidth, y + barHeight, new Color(0, 0, 0, (int)(100 * hbAlpha)));
 
             float health = mc.player.getHealth() + mc.player.getAbsorptionAmount();
             float maxHealth = mc.player.getMaxHealth() + mc.player.getAbsorptionAmount();
@@ -441,11 +438,10 @@ public class HudFeature extends Feature {
                 Color fillColor = healthBarMode.getValue().equalsIgnoreCase("Sync")
                         ? ColorUtils.getGlobalColor()
                         : new Color(format.getColorValue() != null ? format.getColorValue() : 0xFFFFFF);
-
-                Renderer2D.renderQuad(event.getContext(), centerX, y, centerX + filledWidth, y + barHeight, fillColor);
+                Renderer2D.renderQuad(event.getContext(), centerX, y, centerX + filledWidth, y + barHeight, new Color(fillColor.getRed(), fillColor.getGreen(), fillColor.getBlue(), (int)(255 * hbAlpha)));
             }
 
-            Renderer2D.renderOutline(event.getContext(), centerX, y, centerX + maxBarWidth, y + barHeight, Color.black);
+            Renderer2D.renderOutline(event.getContext(), centerX, y, centerX + maxBarWidth, y + barHeight, new Color(0, 0, 0, (int)(255 * hbAlpha)));
         }
     }
 
@@ -454,7 +450,8 @@ public class HudFeature extends Feature {
         int infoOffsetCount = 0;
         chatOffset = chatAnimation.get(mc.currentScreen instanceof ChatScreen ? 14 : 0);
 
-        if (mintUsername.getValue()) {
+        float mintAlpha = mintUsernameAnim();
+        if (mintAlpha > 0 && mintUsername.getValue()) {
             String mint = null;
             if (BotManager.INSTANCE != null) mint = BotManager.INSTANCE.getAuthedMintUsername();
             if (mint == null || mint.trim().isEmpty()) mint = "Not logged in";
@@ -477,32 +474,36 @@ public class HudFeature extends Feature {
             float x = mc.getWindow().getScaledWidth() - 2 - w;
             float y = mc.getWindow().getScaledHeight() - chatOffset - 2 - FontUtils.getHeight() - (FontUtils.getHeight() * infoOffsetCount);
 
-            drawHudText(event.getContext(), text, x, y);
+            drawHudText(event.getContext(), text, x, y, mintAlpha);
             infoOffsetCount++;
         }
 
-        if (potions.getValue()) {
+        float potionsAlpha = potionsAnim();
+        if (potionsAlpha > 0 && potions.getValue()) {
             float baseY = mc.getWindow().getScaledHeight() - chatOffset - 2 - FontUtils.getHeight() - (FontUtils.getHeight() * infoOffsetCount);
 
             for (PotionEntry entry : potionEntries) {
                 float width = entry.isState() ? FontUtils.getWidth(entry.text.getString()) : 0;
                 float x = mc.getWindow().getScaledWidth() - 2 - entry.getAnimationX().get(width);
                 float y = baseY - entry.getAnimationY().get(entry.getTargetY());
-                FontUtils.drawTextWithShadow(event.getContext(), entry.text.getString(), x, y, entry.color);
+                FontUtils.drawTextWithShadow(event.getContext(), entry.text.getString(), x, y, new Color(entry.color.getRed(), entry.color.getGreen(), entry.color.getBlue(), (int)(255 * potionsAlpha)));
                 infoOffsetCount++;
             }
         }
 
-        for (InfoEntry entry : infoEntries) {
-            String displayText = entry.text + Formatting.WHITE + " " + entry.info;
-            float x = mc.getWindow().getScaledWidth() - 2 - (entry.getAnimationX().get(entry.isState() ? FontUtils.getWidth(displayText) : 0));
-            float y = mc.getWindow().getScaledHeight() - chatOffset - 2 - FontUtils.getHeight() - (FontUtils.getHeight() * infoOffsetCount);
-            drawHudText(event.getContext(), Text.literal(displayText), x, y);
-            infoOffsetCount++;
+        float infoAlpha = infoPanelAnim();
+        if (infoAlpha > 0) {
+            for (InfoEntry entry : infoEntries) {
+                String displayText = entry.text + Formatting.WHITE + " " + entry.info;
+                float x = mc.getWindow().getScaledWidth() - 2 - (entry.getAnimationX().get(entry.isState() ? FontUtils.getWidth(displayText) : 0));
+                float y = mc.getWindow().getScaledHeight() - chatOffset - 2 - FontUtils.getHeight() - (FontUtils.getHeight() * infoOffsetCount);
+                drawHudText(event.getContext(), Text.literal(displayText), x, y, infoAlpha);
+                infoOffsetCount++;
+            }
         }
 
-        int coordOffset = 0;
-        if (coordinates.getValue()) {
+        float coordAlpha = coordinatesAnim();
+        if (coordAlpha > 0 && coordinates.getValue()) {
             float y = mc.getWindow().getScaledHeight() - chatOffset - FontUtils.getHeight() - 1;
             String str = "XYZ: " + Formatting.WHITE +
                     MathUtils.round(mc.player.getX(), 2) + Formatting.GRAY + ", " + Formatting.WHITE +
@@ -515,31 +516,72 @@ public class HudFeature extends Feature {
                         MathUtils.round(getDimensionCoord(mc.player.getZ()), 2) + Formatting.GRAY + "]";
             }
 
-            drawHudText(event.getContext(), Text.literal(str), 1.F, y);
-            coordOffset++;
+            drawHudText(event.getContext(), Text.literal(str), 1.F, y, coordAlpha);
+            infoOffsetCount++;
         }
 
-        if (direction.getValue()) {
-            float y = mc.getWindow().getScaledHeight() - chatOffset - FontUtils.getHeight() - 1 - (FontUtils.getHeight() * coordOffset);
+        if (direction.getValue() && coordAlpha > 0) {
+            float y = mc.getWindow().getScaledHeight() - chatOffset - FontUtils.getHeight() - 1 - (FontUtils.getHeight() * (coordinates.getValue() ? 1 : 0));
             String str = getDirections();
-            drawHudText(event.getContext(), Text.literal(str), 1.F, y);
+            drawHudText(event.getContext(), Text.literal(str), 1.F, y, coordAlpha);
         }
 
-        float miscOffset = 0;
-        for (MiscEntry entry : miscEntries) {
-            float targetY = 2 + miscOffset + FontUtils.getHeight();
-            String text = entry.getText();
-            if (entry.getTime() != null)
-                text += String.format(" (%.1f%s)", entry.getTime(), entry.getSuffix());
+        float miscAlpha = miscPanelAnim();
+        if (miscAlpha > 0) {
+            float miscOffset = 0;
+            for (MiscEntry entry : miscEntries) {
+                float targetY = 2 + miscOffset + FontUtils.getHeight();
+                String text = entry.getText();
+                if (entry.getTime() != null)
+                    text += String.format(" (%.1f%s)", entry.getTime(), entry.getSuffix());
 
-            float y = entry.getAnimationY().get(entry.isState() ? targetY : -(FontUtils.getHeight() + 1));
-            float x = (mc.getWindow().getScaledWidth() / 2.f) - (FontUtils.getWidth(text) / 2.f);
-            FontUtils.drawTextWithShadow(event.getContext(), text, x, y - FontUtils.getHeight(), entry.getColor());
-            miscOffset += FontUtils.getHeight() + 1;
+                float y = entry.getAnimationY().get(entry.isState() ? targetY : -(FontUtils.getHeight() + 1));
+                float x = (mc.getWindow().getScaledWidth() / 2.f) - (FontUtils.getWidth(text) / 2.f);
+                FontUtils.drawTextWithShadow(event.getContext(), text, x, y - FontUtils.getHeight(), new Color(entry.getColor().getRed(), entry.getColor().getGreen(), entry.getColor().getBlue(), (int)(255 * miscAlpha)));
+                miscOffset += FontUtils.getHeight() + 1;
+            }
         }
     }
 
-    private void drawHudText(DrawContext context, Text text, float x, float y) {
+    private float watermarkAnim() {
+        return isEnabled() ? watermark.getAnimation().get(watermark.getValue() ? 1 : 0) : 0;
+    }
+
+    private float moduleListAnim() {
+        return isEnabled() ? moduleList.getAnimation().get(moduleList.getValue() ? 1 : 0) : 0;
+    }
+
+    private float coordinatesAnim() {
+        return isEnabled() ? coordinates.getAnimation().get(coordinates.getValue() ? 1 : 0) : 0;
+    }
+
+    private float armorAnim() {
+        return isEnabled() ? armor.getAnimation().get(armor.getValue() ? 1 : 0) : 0;
+    }
+
+    private float potionsAnim() {
+        return isEnabled() ? potions.getAnimation().get(potions.getValue() ? 1 : 0) : 0;
+    }
+
+    private float mintUsernameAnim() {
+        return isEnabled() ? mintUsername.getAnimation().get(mintUsername.getValue() ? 1 : 0) : 0;
+    }
+
+    private float infoPanelAnim() {
+        boolean active = fps.getValue() || ping.getValue() || tps.getValue() || speedometer.getValue() || brand.getValue() || durability.getValue() || chestCounter.getValue();
+        return isEnabled() ? new Animation(300, Easing.Method.EASE_OUT_QUAD).get(active ? 1 : 0) : 0;
+    }
+
+    private float miscPanelAnim() {
+        boolean active = pearlCooldown.getValue() || serverLag.getValue() || armorWarning.getValue();
+        return isEnabled() ? new Animation(300, Easing.Method.EASE_OUT_QUAD).get(active ? 1 : 0) : 0;
+    }
+
+    private float healthBarAnim() {
+        return isEnabled() ? new Animation(300, Easing.Method.EASE_OUT_QUAD).get(!healthBarMode.getValue().equalsIgnoreCase("None") ? 1 : 0) : 0;
+    }
+
+    private void drawHudText(DrawContext context, Text text, float x, float y, float alpha) {
         ColorFeature colorFeature = Managers.FEATURE.getFeatureFromClass(ColorFeature.class);
         if (colorFeature != null && "Gradient".equals(colorFeature.mode.getValue())) {
             Color main = colorFeature.color.getColor();
@@ -549,8 +591,17 @@ public class HudFeature extends Feature {
             double timeOffset = System.currentTimeMillis() * speed / 1000.0;
             GradientTextUtil.drawAnimatedGradientText(context, mc.textRenderer, clean, x, y, timeOffset, main, dark, true);
         } else {
-            context.drawTextWithShadow(mc.textRenderer, text, (int) x, (int) y, getHudColor(y).getRGB());
+            int baseColor = getHudColor(y).getRGB();
+            int a = (int)(255 * alpha);
+            int r = (baseColor >> 16) & 0xFF;
+            int g = (baseColor >> 8) & 0xFF;
+            int b = baseColor & 0xFF;
+            context.drawTextWithShadow(mc.textRenderer, text, (int) x, (int) y, (a << 24) | (r << 16) | (g << 8) | b);
         }
+    }
+
+    private void drawHudText(DrawContext context, Text text, float x, float y) {
+        drawHudText(context, text, x, y, 1.0f);
     }
 
     private float getCooldown() {

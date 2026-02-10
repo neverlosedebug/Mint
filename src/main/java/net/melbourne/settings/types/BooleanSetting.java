@@ -6,6 +6,8 @@ import net.melbourne.Melbourne;
 import net.melbourne.events.impl.SettingChangeEvent;
 import net.melbourne.interfaces.Nameable;
 import net.melbourne.settings.Setting;
+import net.melbourne.utils.animations.Animation;
+import net.melbourne.utils.animations.Easing;
 
 import java.util.function.Supplier;
 
@@ -14,6 +16,7 @@ import java.util.function.Supplier;
 public class BooleanSetting extends Setting implements Nameable {
     public boolean value;
     private final boolean defaultValue;
+    private final Animation animation = new Animation(300, Easing.Method.EASE_OUT_QUAD);
 
     public BooleanSetting(String name, String description, boolean value) {
         super(name, description, true);
@@ -49,5 +52,9 @@ public class BooleanSetting extends Setting implements Nameable {
     @Override
     public String getName() {
         return name;
+    }
+
+    public Animation getAnimation() {
+        return animation;
     }
 }

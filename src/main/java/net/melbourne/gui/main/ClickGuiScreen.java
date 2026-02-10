@@ -4,7 +4,6 @@ import lombok.Getter;
 import lombok.Setter;
 import net.melbourne.Managers;
 import net.melbourne.modules.Category;
-import net.melbourne.modules.Feature;
 import net.melbourne.modules.impl.client.ClickGuiFeature;
 import net.melbourne.utils.graphics.impl.Renderer2D;
 import net.melbourne.utils.graphics.impl.font.FontUtils;
