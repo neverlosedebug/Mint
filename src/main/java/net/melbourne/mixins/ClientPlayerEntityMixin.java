@@ -185,6 +185,19 @@ public abstract class ClientPlayerEntityMixin extends AbstractClientPlayerEntity
         }
     }
 
+    @Inject(
+            method = "tick",
+            at = @At(
+                    value = "INVOKE",
+                    target = "Lnet/minecraft/client/network/AbstractClientPlayerEntity;tick()V",
+                    shift = At.Shift.BEFORE,
+                    ordinal = 0
+            )
+    )
+    private void onTickPre(CallbackInfo ci) {
+        Melbourne.EVENT_HANDLER.post(new PlayerTickEvent());
+    }
+
     @Inject(method = "sendMovementPackets", at = @At(value = "HEAD"), cancellable = true)
     private void onSendMovementPacketsHead(CallbackInfo info) {
         LocationEvent event = new LocationEvent(mc.player.getX(), mc.player.getY(), mc.player.getZ(), mc.player.getYaw(), mc.player.getPitch(), mc.player.isOnGround(), mc.player.horizontalCollision);
