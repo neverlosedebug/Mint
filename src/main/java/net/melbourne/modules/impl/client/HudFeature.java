@@ -67,6 +67,8 @@ public class HudFeature extends Feature {
     public BooleanSetting showVersion = new BooleanSetting("ShowVersion", "Show mod version in watermark.", true, () -> watermark.getValue());
     public BooleanSetting showRevision = new BooleanSetting("ShowRevision", "Show git revision in watermark.", true, () -> watermark.getValue() && !Melbourne.GIT_REVISION.isEmpty());
     public BooleanSetting showHash = new BooleanSetting("ShowHash", "Show git hash in watermark.", true, () -> watermark.getValue() && !Melbourne.GIT_HASH.isEmpty());
+    public BooleanSetting welcomer = new BooleanSetting("Welcomer", "Shows a welcome message on screen.", true);
+    public BooleanSetting showRoleInWelcomer = new BooleanSetting("ShowRoleInWelcomer", "Displays your Mint role in the welcome message.", false, () -> welcomer.getValue());
     public BooleanSetting moduleList = new BooleanSetting("ModuleList", "Displays a list of modules you have enabled.", true);
     public ModeSetting sortingMode = new ModeSetting("Sorting", "Mode", "Length", new String[]{"Length", "Alphabetical"}, () -> moduleList.getValue());
     public BooleanSetting coordinates = new BooleanSetting("Coordinates", "Displays your ingame world coordinates.", true);
@@ -308,6 +310,32 @@ public class HudFeature extends Feature {
     @SubscribeEvent
     public void renderHud(RenderHudEvent event) {
         if (mc.player == null) return;
+
+        if (welcomer.getValue()) {
+            String playerName = mc.getSession().getUsername();
+            String rolePart = "";
+            String fullTextForWidth = "Welcome back, " + playerName;
+
+            if (showRoleInWelcomer.getValue() && BotManager.INSTANCE != null) {
+                String rank = BotManager.INSTANCE.getAuthedMintRank();
+                if (rank != null && !rank.trim().isEmpty()) {
+                    String rl = rank.trim().toLowerCase();
+                    String formattedRole = rl.substring(0, 1).toUpperCase() + (rl.length() > 1 ? rl.substring(1) : "");
+                    rolePart = " — Your role is: " + Formatting.WHITE + formattedRole;
+                    fullTextForWidth += " - Your role is: " + formattedRole;
+                }
+            }
+
+            Text welcomeText = Text.literal("Welcome back, ")
+                    .append(Text.literal(playerName).formatted(Formatting.WHITE))
+                    .append(rolePart);
+
+            float textWidth = FontUtils.getWidth(fullTextForWidth);
+            float x = (mc.getWindow().getScaledWidth() - textWidth) / 2.0f;
+            float y = 1;
+
+            drawHudText(event.getContext(), welcomeText, x, y, 1.0f);
+        }
 
         float wmAlpha = watermarkAnim();
         if (wmAlpha > 0 && watermark.getValue()) {
