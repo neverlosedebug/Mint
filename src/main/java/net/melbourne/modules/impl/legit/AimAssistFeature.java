@@ -145,6 +145,6 @@ public class AimAssistFeature extends Feature {
 
     @Override
     public String getInfo() {
-        return "" + aimMode.getValue();
+        return aimMode.getValue();
     }
 }
