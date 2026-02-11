@@ -16,8 +16,11 @@ import net.minecraft.entity.attribute.EntityAttribute;
 import net.minecraft.entity.attribute.EntityAttributeInstance;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.attribute.EntityAttributes;
+import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.world.World;
+import net.melbourne.modules.impl.player.AntiLevitationFeature;
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -60,6 +63,41 @@ public abstract class LivingEntityMixin extends Entity implements Globals {
         if (Managers.FEATURE != null && Managers.FEATURE.getFeatureFromClass(NoJumpDelayFeature.class).isEnabled() && jumpingCooldown == 10) {
             jumpingCooldown = Managers.FEATURE.getFeatureFromClass(NoJumpDelayFeature.class).ticks.getValue().intValue();
         }
+    }
+
+    @ModifyExpressionValue(
+            method = "travelMidAir",
+            at = @At(
+                    value = "INVOKE",
+                    target = "Lnet/minecraft/entity/LivingEntity;getStatusEffect(Lnet/minecraft/registry/entry/RegistryEntry;)Lnet/minecraft/entity/effect/StatusEffectInstance;"
+            )
+    )
+    private StatusEffectInstance travelMidAir$getStatusEffect(StatusEffectInstance original) {
+        if ((Object) this == mc.player) {
+            AntiLevitationFeature antiLevitation = Managers.FEATURE.getFeatureFromClass(AntiLevitationFeature.class);
+            if (antiLevitation.isEnabled()) {
+                return null;
+            }
+        }
+        return original;
+    }
+
+    @ModifyExpressionValue(
+            method = "tickMovement",
+            at = @At(
+                    value = "INVOKE",
+                    target = "Lnet/minecraft/entity/LivingEntity;hasStatusEffect(Lnet/minecraft/registry/entry/RegistryEntry;)Z",
+                    ordinal = 1
+            )
+    )
+    private boolean tickMovement$hasStatusEffect(boolean original) {
+        if ((Object) this == mc.player) {
+            AntiLevitationFeature antiLevitation = Managers.FEATURE.getFeatureFromClass(AntiLevitationFeature.class);
+            if (antiLevitation.isEnabled()) {
+                return false;
+            }
+        }
+        return original;
     }
 
     @Inject(method = "setSprinting", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;setSprinting(Z)V", shift = At.Shift.AFTER), cancellable = true)

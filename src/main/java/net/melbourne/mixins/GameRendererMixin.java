@@ -7,6 +7,7 @@ import net.melbourne.Melbourne;
 import net.melbourne.events.impl.RenderEntityEvent;
 import net.melbourne.events.impl.RenderShaderEvent;
 import net.melbourne.events.impl.RenderWorldEvent;
+import net.melbourne.modules.impl.player.NoEntityTraceFeature;
 import net.melbourne.modules.impl.render.NoRenderFeature;
 import net.melbourne.utils.graphics.api.WorldContext;
 import net.melbourne.utils.graphics.impl.Renderer3D;
@@ -14,6 +15,9 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.Camera;
 import net.minecraft.client.render.GameRenderer;
 import net.minecraft.client.render.RenderTickCounter;
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
+import net.minecraft.util.hit.EntityHitResult;
+import net.melbourne.modules.impl.render.CustomBobbingFeature;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
 import org.joml.Matrix4f;
@@ -22,6 +26,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(GameRenderer.class)
@@ -80,10 +85,44 @@ public abstract class GameRendererMixin {
         Melbourne.EVENT_HANDLER.post(new RenderShaderEvent.Post());
     }
 
+    /**
+     * @see NoEntityTraceFeature
+     */
+    @ModifyExpressionValue(
+            method = "findCrosshairTarget",
+            at = @At(
+                    value = "INVOKE",
+                    target = "Lnet/minecraft/entity/projectile/ProjectileUtil;raycast(Lnet/minecraft/entity/Entity;Lnet/minecraft/util/math/Vec3d;Lnet/minecraft/util/math/Vec3d;Lnet/minecraft/util/math/Box;Ljava/util/function/Predicate;D)Lnet/minecraft/util/hit/EntityHitResult;"
+            )
+    )
+    private EntityHitResult modifyEntityHitResult(EntityHitResult original) {
+        var noEntityTrace = Managers.FEATURE.getFeatureFromClass(NoEntityTraceFeature.class);
+        if (noEntityTrace != null && noEntityTrace.isEnabled()) {
+            return null;
+        }
+        return original;
+    }
+
     @Inject(method = "tiltViewWhenHurt", at = @At("HEAD"), cancellable = true)
     private void tiltViewWhenHurt(CallbackInfo info) {
         if (Managers.FEATURE.getFeatureFromClass(NoRenderFeature.class).isEnabled() && Managers.FEATURE.getFeatureFromClass(NoRenderFeature.class).hurtCamera.getValue())
             info.cancel();
+    }
+
+    /**
+     * @see CustomBobbingFeature
+     */
+    @ModifyVariable(
+            method = "bobView",
+            at = @At("STORE"),
+            ordinal = 1
+    )
+    private float modifyBobIntensity(float original) {
+        var customBobbing = Managers.FEATURE.getFeatureFromClass(CustomBobbingFeature.class);
+        if (customBobbing != null && customBobbing.isEnabled()) {
+            return original * customBobbing.intensity.getValue().floatValue();
+        }
+        return original;
     }
 
     @Inject(method = "showFloatingItem", at = @At("HEAD"), cancellable = true)
