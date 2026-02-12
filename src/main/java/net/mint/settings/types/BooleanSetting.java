@@ -1,0 +1,60 @@
+package net.mint.settings.types;
+
+import lombok.Getter;
+import lombok.Setter;
+import net.mint.Mint;
+import net.mint.events.impl.SettingChangeEvent;
+import net.mint.interfaces.Nameable;
+import net.mint.settings.Setting;
+import net.mint.utils.animations.Animation;
+import net.mint.utils.animations.Easing;
+
+import java.util.function.Supplier;
+
+@Getter
+@Setter
+public class BooleanSetting extends Setting implements Nameable {
+    public boolean value;
+    private final boolean defaultValue;
+    private final Animation animation = new Animation(300, Easing.Method.EASE_OUT_QUAD);
+
+    public BooleanSetting(String name, String description, boolean value) {
+        super(name, description, true);
+        this.value = value;
+        this.defaultValue = value;
+    }
+
+    public BooleanSetting(String name, String description, boolean value, boolean visibility) {
+        super(name, description, visibility);
+        this.value = value;
+        this.defaultValue = value;
+    }
+
+    public BooleanSetting(String name, String description, boolean value, Supplier<Boolean> visibility) {
+        super(name, description, visibility);
+        this.value = value;
+        this.defaultValue = value;
+    }
+
+    public boolean getValue() {
+        return value;
+    }
+
+    public void resetValue() {
+        value = defaultValue;
+    }
+
+    public void setValue(boolean value) {
+        this.value = value;
+        Mint.EVENT_HANDLER.post(new SettingChangeEvent(this));
+    }
+
+    @Override
+    public String getName() {
+        return name;
+    }
+
+    public Animation getAnimation() {
+        return animation;
+    }
+}

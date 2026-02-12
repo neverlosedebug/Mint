@@ -1,0 +1,150 @@
+package net.mint.modules.impl.client;
+
+import net.mint.Managers;
+import net.mint.events.impl.PacketEvent;
+import net.mint.services.Services;
+import net.mint.events.SubscribeEvent;
+import net.mint.events.impl.PlayerDeathEvent;
+import net.mint.events.impl.PlayerPopEvent;
+import net.mint.events.impl.AddEntityEvent;
+import net.mint.modules.Category;
+import net.mint.modules.Feature;
+import net.mint.modules.FeatureInfo;
+import net.mint.settings.types.BooleanSetting;
+import net.mint.settings.types.NumberSetting;
+import net.mint.utils.miscellaneous.ColorUtils;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.network.packet.s2c.play.GameMessageS2CPacket;
+import net.minecraft.text.Text;
+
+import java.awt.*;
+import java.net.URL;
+
+@FeatureInfo(name = "Notifications", category = Category.Client)
+public class NotificationsFeature extends Feature {
+
+    public final BooleanSetting totemPops = new BooleanSetting("TotemPops", "Show totem pop and death notifications.", true);
+    public final BooleanSetting moduleToggles = new BooleanSetting("ModuleToggles", "Show module enable/disable notifications.", true);
+    public final BooleanSetting pingSpike = new BooleanSetting("LatencySpike", "Detects sudden latency increases.", true);
+    public final NumberSetting spikeThreshold = new NumberSetting("LatencyThreshold", "Ping increase required to trigger.", 100, 1, 500, () -> pingSpike.getValue());
+
+    // хуйню сморозил // chatmentions ващето имбу
+    public final BooleanSetting windowsNotifs = new BooleanSetting("WindowsNotifications", "Enable system tray notifications when the game is unfocused.", false);
+    public final BooleanSetting chatMentions = new BooleanSetting("ChatMentions", "Notify when mentioned in chat.", true);
+    public final BooleanSetting visualRange = new BooleanSetting("VisualRange", "Notify when a player enters render distance.", false);
+    public final BooleanSetting includeFriends = new BooleanSetting("IncludeFriends", "Also notify for friends entering range.", false, () -> visualRange.getValue());
+
+    @SubscribeEvent
+    public void onPacketReceive(PacketEvent.Receive event) {
+        if (getNull() || !windowsNotifs.getValue() || !chatMentions.getValue()) return;
+        if (mc.isWindowFocused()) return;
+        if (!(event.getPacket() instanceof GameMessageS2CPacket packet)) return;
+
+        Text messageText = packet.content();
+        if (messageText == null) return;
+
+        String message = messageText.getString();
+        String selfName = mc.player.getName().getString();
+
+        if (message.startsWith("<" + selfName + ">")) return;
+
+        if (message.contains(selfName)) {
+            sendWindowsNotification("You were mentioned in chat", message, TrayIcon.MessageType.INFO);
+        }
+    }
+
+    @SubscribeEvent
+    public void onPlayerPop(PlayerPopEvent event) {
+        if (getNull() || !totemPops.getValue()) return;
+
+        boolean isSelf = event.getPlayer() == mc.player;
+        String name = isSelf ? "You" : event.getPlayer().getName().getString();
+        String amount = String.valueOf(event.getPops());
+        String totems = event.getPops() == 1 ? "totem" : "totems";
+
+        Text nameText = Text.literal(name).styled(s -> s.withColor(ColorUtils.getGlobalColor().getRGB()));
+        Text amountText = Text.literal(amount).styled(s -> s.withColor(ColorUtils.getGlobalColor().getRGB()));
+
+        Text msg = Text.literal("")
+                .append(nameText)
+                .append(Text.literal(" §7has popped §s"))
+                .append(amountText)
+                .append(Text.literal(" §7" + totems + "§s"))
+                .append(Text.literal("§7."));
+
+        Services.CHAT.sendPop(event.getPlayer().getUuid(), msg, true);
+
+        if (isSelf && windowsNotifs.getValue() && !mc.isWindowFocused()) {
+            sendWindowsNotification("You have been popped", "Totems in total: " + (event.getPops() - 1), TrayIcon.MessageType.WARNING);
+        }
+    }
+
+    @SubscribeEvent
+    public void onPlayerDeath(PlayerDeathEvent event) {
+        if (getNull() || !totemPops.getValue()) return;
+
+        int pops = Services.WORLD.getPoppedTotems().getOrDefault(event.getPlayer().getUuid(), 0);
+        if (pops <= 0) return;
+
+        boolean isSelf = event.getPlayer() == mc.player;
+        String name = isSelf ? "You" : event.getPlayer().getName().getString();
+        String totems = pops == 1 ? "totem" : "totems";
+
+        Text nameText = Text.literal(name).styled(s -> s.withColor(ColorUtils.getGlobalColor().getRGB()));
+        Text amountText = Text.literal(String.valueOf(pops)).styled(s -> s.withColor(ColorUtils.getGlobalColor().getRGB()));
+
+        Text msg = Text.literal("")
+                .append(nameText)
+                .append(Text.literal(" §7has died after popping §s"))
+                .append(amountText)
+                .append(Text.literal(" §7" + totems + "§s"))
+                .append(Text.literal("§7."));
+
+        Services.CHAT.sendPop(event.getPlayer().getUuid(), msg, true);
+
+        if (isSelf && windowsNotifs.getValue() && !mc.isWindowFocused()) {
+            sendWindowsNotification("You have died", "After popping " + pops + " " + totems, TrayIcon.MessageType.ERROR);
+        }
+    }
+
+    @SubscribeEvent
+    public void onAddEntity(AddEntityEvent event) {
+        if (getNull() || !windowsNotifs.getValue() || !visualRange.getValue()) return;
+
+        Entity entity = event.getEntity();
+        if (!(entity instanceof PlayerEntity player) || player == mc.player) return;
+
+        String playerName = player.getName().getString();
+        if (playerName == null || playerName.isEmpty()) return;
+
+        if (Managers.FRIEND.isFriend(playerName) && !includeFriends.getValue()) return;
+
+        if (mc.isWindowFocused()) return;
+
+        sendWindowsNotification(playerName + " entered visual range", "", TrayIcon.MessageType.INFO);
+    }
+
+    // иди нахуй
+    private void sendWindowsNotification(String title, String message, TrayIcon.MessageType type) {
+        try {
+            if (!SystemTray.isSupported()) return;
+
+            URL iconUrl = getClass().getClassLoader().getResource("assets/mint/icon/icon.png");
+            if (iconUrl == null) return;
+
+            Image image = Toolkit.getDefaultToolkit().createImage(iconUrl);
+            PopupMenu popup = new PopupMenu();
+            TrayIcon trayIcon = new TrayIcon(image, "", popup);
+            trayIcon.setImageAutoSize(true);
+
+            SystemTray tray = SystemTray.getSystemTray();
+            tray.add(trayIcon);
+            trayIcon.displayMessage(title, message, type);
+            tray.remove(trayIcon);
+
+        } catch (Exception ignored) {
+
+        }
+    }
+}

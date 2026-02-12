@@ -82,7 +82,7 @@ tasks.withType(JavaCompile).configureEach {
 }
 
 loom {
-    accessWidenerPath = file("src/main/resources/melbourne.accesswidener")
+    accessWidenerPath = file("src/main/resources/mint.accesswidener")
 }
 
 java {

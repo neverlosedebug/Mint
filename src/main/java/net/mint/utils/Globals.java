@@ -1,0 +1,7 @@
+package net.mint.utils;
+
+import net.minecraft.client.MinecraftClient;
+
+public interface Globals {
+    MinecraftClient mc = MinecraftClient.getInstance();
+}

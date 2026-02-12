@@ -1,0 +1,10 @@
+package net.mint.modules.impl.player;
+
+import net.mint.modules.Category;
+import net.mint.modules.Feature;
+import net.mint.modules.FeatureInfo;
+
+@FeatureInfo(name = "AntiLevitation", category = Category.Player)
+public class AntiLevitationFeature extends Feature {
+
+}

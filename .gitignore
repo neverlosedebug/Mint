@@ -43,5 +43,5 @@ bin/
 /.idea
 /main/.idea
 /run
-src/main/java/net/melbourne/modules/impl/render/HoleESPFeature.java
-src/main/java/net/melbourne/modules/impl/render/HoleESPFeature.java
+src/main/java/net/mint/modules/impl/render/HoleESPFeature.java
+src/main/java/net/mint/modules/impl/render/HoleESPFeature.java
