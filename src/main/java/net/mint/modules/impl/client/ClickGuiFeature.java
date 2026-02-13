@@ -35,6 +35,8 @@ public class ClickGuiFeature extends Feature {
             new Color(0, 0, 0),
             () -> moduleOutline.getValue()
     );
+    public ColorSetting enabledTextColor = new ColorSetting("Enabled Text", "Color of enabled module names.", Color.WHITE);
+    public ColorSetting disabledTextColor = new ColorSetting("Disabled Text", "Color of disabled module names.", new Color(192, 192, 192));
     public BooleanSetting glowEffect = new BooleanSetting( // todo: optimize this
             "Glow Effect",
             "Enable a subtle fade-in glow from the left edge of each module.",
@@ -75,6 +77,36 @@ public class ClickGuiFeature extends Feature {
     );
     public ColorSetting backgroundColor = new ColorSetting("Background", "GUI background color.", new Color(30, 30, 30, 150));
     public NumberSetting animationSpeed = new NumberSetting("Anim Speed", "Window open/close animation speed (ms).", 150, 50, 500);
+
+    public BooleanSetting resetToDefault = new BooleanSetting("Reset to Default", "Reset all ClickGUI settings to their default values.", false) {
+        @Override
+        public void setValue(boolean value) {
+            if (value) {
+                sounds.setValue(false);
+                outline.setValue(true);
+                accentBar.setValue(false);
+                accentColor.setValue(new Color(163, 255, 202));
+                accentSide.setValue("Left");
+                moduleOutline.setValue(false);
+                outlineColor.setValue(new Color(0, 0, 0));
+                glowEffect.setValue(false);
+                glowColor.setValue(new Color(163, 255, 202, 100));
+                topGlow.setValue(false);
+                topGlowColor.setValue(new Color(0, 0, 0, 100));
+                showGear.setValue(false);
+                openSymbol.setValue("=");
+                closeSymbol.setValue("≡");
+                backgroundColor.setValue(new Color(30, 30, 30, 150));
+                animationSpeed.setValue(150.0);
+                enabledTextColor.setValue(Color.WHITE);
+                disabledTextColor.setValue(new Color(192, 192, 192));
+
+                super.setValue(false);
+            } else {
+                super.setValue(false);
+            }
+        }
+    };
 
     @Override
     public void onEnable() {

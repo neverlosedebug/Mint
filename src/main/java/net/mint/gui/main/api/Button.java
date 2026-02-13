@@ -2,6 +2,8 @@ package net.mint.gui.main.api;
 
 import lombok.Getter;
 import lombok.Setter;
+import net.mint.Managers;
+import net.mint.modules.impl.client.ClickGuiFeature;
 import net.mint.settings.Setting;
 import net.mint.utils.animations.Animation;
 import net.mint.utils.animations.Easing;
@@ -65,8 +67,17 @@ public class Button {
         context.getMatrices().popMatrix();
     }
 
-    public Color getTextColor(Animation animation, boolean flag) {
-        int value = 192 + (int) animation.get(flag ? 63 : 0);
-        return new Color(value, value, value, 255);
+    public Color getTextColor(Animation animation, boolean enabled) {
+        ClickGuiFeature clickGui = Managers.FEATURE.getFeatureFromClass(ClickGuiFeature.class);
+
+        if (clickGui != null) {
+            return enabled
+                    ? clickGui.enabledTextColor.getColor()
+                    : clickGui.disabledTextColor.getColor();
+        }
+
+        // fallback
+        int gray = enabled ? 255 : 192;
+        return new Color(gray, gray, gray, 255);
     }
 }
