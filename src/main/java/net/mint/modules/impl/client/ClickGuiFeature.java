@@ -4,10 +4,7 @@ import net.mint.Mint;
 import net.mint.modules.Category;
 import net.mint.modules.Feature;
 import net.mint.modules.FeatureInfo;
-import net.mint.settings.types.BooleanSetting;
-import net.mint.settings.types.ColorSetting;
-import net.mint.settings.types.NumberSetting;
-import net.mint.settings.types.TextSetting;
+import net.mint.settings.types.*;
 import org.lwjgl.glfw.GLFW;
 
 import java.awt.*;
@@ -17,6 +14,27 @@ public class ClickGuiFeature extends Feature {
 
     public BooleanSetting sounds = new BooleanSetting("Sounds", "Custom sounds when enabling or disabling modules.", false);
     public BooleanSetting outline = new BooleanSetting("Outline", "Enable window outline.", true);
+    public BooleanSetting accentBar = new BooleanSetting("Accent Bar", "Show a colored accent bar next to each module.", false);
+    public ColorSetting accentColor = new ColorSetting(
+            "Accent Color",
+            "Color of the module accent bar.",
+            new Color(163, 255, 202),
+            () -> accentBar.getValue()
+    );
+    public ModeSetting accentSide = new ModeSetting(
+            "Accent Side",
+            "Position of the accent bar.",
+            "Left",
+            new String[]{"Left", "Right"},
+            () -> accentBar.getValue()
+    );
+    public BooleanSetting moduleOutline = new BooleanSetting("Module Outline", "Show a colored outline around each module.", true);
+    public ColorSetting outlineColor = new ColorSetting(
+            "Outline Color",
+            "Color of the module outline.",
+            new Color(0, 0, 0),
+            () -> moduleOutline.getValue()
+    );
     public ColorSetting backgroundColor = new ColorSetting("Background", "GUI background color.", new Color(30, 30, 30, 150));
     public NumberSetting animationSpeed = new NumberSetting("Anim Speed", "Window open/close animation speed (ms).", 150, 50, 500);
     public BooleanSetting showGear = new BooleanSetting("Show Gear", "Show open/close symbols next to module names.", false);

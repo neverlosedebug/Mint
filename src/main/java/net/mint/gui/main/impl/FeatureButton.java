@@ -78,6 +78,30 @@ public class FeatureButton extends Button {
         }
 
         ClickGuiFeature clickGui = Managers.FEATURE.getFeatureFromClass(ClickGuiFeature.class);
+        if (clickGui.accentBar.getValue()) {
+            Color barColor = clickGui.accentColor.getColor();
+            float x1, x2;
+            if ("Right".equals(clickGui.accentSide.getValue())) {
+                x1 = getX() + getWidth() + 1.5f;
+                x2 = getX() + getWidth() + 2.5f;
+            } else {
+                x1 = getX() - 2.5f;
+                x2 = getX() - 1.5f;
+            }
+            Renderer2D.renderQuad(context, x1, getY() + 0.5f, x2, getY() + super.getHeight() - 0.5f, barColor);
+        }
+
+        if (clickGui.moduleOutline.getValue()) {
+            Color outlineColor = clickGui.outlineColor.getColor();
+            Renderer2D.renderOutline(
+                    context,
+                    getX() - 2.5f,
+                    getY() + 0.5f,
+                    getX() + getWidth() + 2.5f,
+                    getY() + super.getHeight() - 0.5f,
+                    outlineColor
+            );
+        }
 
         if (clickGui.showGear.getValue()) {
             String symbol = open ? clickGui.closeSymbol.getValue() : clickGui.openSymbol.getValue();
