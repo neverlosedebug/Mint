@@ -8,6 +8,7 @@ import net.mint.events.impl.RenderEntityEvent;
 import net.mint.events.impl.RenderShaderEvent;
 import net.mint.events.impl.RenderWorldEvent;
 import net.mint.modules.impl.player.NoEntityTraceFeature;
+import net.mint.modules.impl.render.AspectFeature;
 import net.mint.modules.impl.render.NoRenderFeature;
 import net.mint.utils.graphics.api.WorldContext;
 import net.mint.utils.graphics.impl.Renderer3D;
@@ -28,6 +29,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(GameRenderer.class)
 public abstract class GameRendererMixin {
@@ -124,6 +126,27 @@ public abstract class GameRendererMixin {
         }
         return original;
     }
+
+    @Inject(method = "getBasicProjectionMatrix", at = @At("TAIL"), cancellable = true)
+    public void getBasicProjectionMatrix(float fovDegrees, CallbackInfoReturnable<Matrix4f> info) {
+        var aspectModule = Managers.FEATURE.getFeatureFromClass(AspectFeature.class);
+        if (aspectModule != null && aspectModule.isEnabled()) {
+            float aspectRatio = aspectModule.ratio.getValue().floatValue();
+
+            Matrix4f projectionMatrix = new Matrix4f();
+            projectionMatrix.setPerspective(
+                    (float) Math.toRadians(fovDegrees),
+                    aspectRatio,
+                    0.05f,
+                    this.getFarPlaneDistance()
+            );
+
+            info.setReturnValue(projectionMatrix);
+        }
+    }
+
+    @Shadow
+    protected abstract float getFarPlaneDistance();
 
     @Inject(method = "showFloatingItem", at = @At("HEAD"), cancellable = true)
     private void showFloatingItem(ItemStack floatingItem, CallbackInfo info) {
