@@ -18,8 +18,14 @@ public final class CapesFeature extends Feature {
     private static final Identifier BUTTERFLY_CAPE = Identifier.of("mint", "textures/butterfly.png");
     private static final Identifier HIGHLAND_CAPE = Identifier.of("mint", "textures/highland.png");
     private static final Identifier HLDARK_CAPE = Identifier.of("mint", "textures/hldark.png");
+    private static final Identifier NL_CAPE = Identifier.of("mint", "textures/nl.png");
 
-    public final ModeSetting mode = new ModeSetting("Cape", "Choose which cape to display when Capes is enabled.", "Mint", new String[]{"Mint", "Peacekeepers", "Emperium", "Dot5", "Spotify", "Butterfly", "Highland", "HlDark"}) {
+    public final ModeSetting mode = new ModeSetting(
+            "Cape",
+            "Choose which cape to display when Capes is enabled.",
+            "Mint",
+            new String[]{"Mint", "Peacekeepers", "Emperium", "Dot5", "Spotify", "Butterfly", "Highland", "HlDark", "NL"}
+    ) {
         @Override
         public void setValue(String value) {
             super.setValue(value);
@@ -56,7 +62,8 @@ public final class CapesFeature extends Feature {
             case "Butterfly" -> BUTTERFLY_CAPE;
             case "Highland" -> HIGHLAND_CAPE;
             case "HlDark" -> HLDARK_CAPE;
-            default          -> MINT_CAPE;
+            case "NL" -> NL_CAPE;
+            default -> MINT_CAPE;
         };
     }
 
@@ -70,6 +77,7 @@ public final class CapesFeature extends Feature {
             case "Butterfly" -> BUTTERFLY_CAPE;
             case "Highland" -> HIGHLAND_CAPE;
             case "HlDark" -> HLDARK_CAPE;
+            case "NL" -> NL_CAPE;
             default -> MINT_CAPE;
         };
     }

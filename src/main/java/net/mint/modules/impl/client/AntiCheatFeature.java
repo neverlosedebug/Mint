@@ -12,6 +12,7 @@ import net.mint.utils.miscellaneous.Timer;
 
 @FeatureInfo(name = "AntiCheat", category = Category.Client)
 public class AntiCheatFeature extends Feature {
+
     public BooleanSetting altSwap = new BooleanSetting("AltSwap", "Uses intermediate hotbar slot to prevent swap desync on strict servers.", true);
     public BooleanSetting moveFix = new BooleanSetting("MoveFix", "Forces your player to move towards their rotation.", true);
     public ModeSetting timerMode = new ModeSetting("TimerMode", "This is to control the mode of timer we will use on different modules.", "Normal", new String[]{"Normal", "Physics"});

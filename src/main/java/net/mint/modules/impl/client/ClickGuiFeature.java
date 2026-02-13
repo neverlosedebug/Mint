@@ -47,11 +47,22 @@ public class ClickGuiFeature extends Feature {
             new Color(163, 255, 202, 100),
             () -> glowEffect.getValue()
     );
+    public BooleanSetting showGear = new BooleanSetting("Show Gear", "Show open/close symbols next to module names.", false);
+    public TextSetting openSymbol = new TextSetting(
+            "OpenGear",
+            "Gear shown when module settings are collapsed",
+            "=",
+            () -> showGear.getValue()
+    );
+
+    public TextSetting closeSymbol = new TextSetting(
+            "CloseGear",
+            "Gear shown when module settings are expanded",
+            "≡",
+            () -> showGear.getValue()
+    );
     public ColorSetting backgroundColor = new ColorSetting("Background", "GUI background color.", new Color(30, 30, 30, 150));
     public NumberSetting animationSpeed = new NumberSetting("Anim Speed", "Window open/close animation speed (ms).", 150, 50, 500);
-    public BooleanSetting showGear = new BooleanSetting("Show Gear", "Show open/close symbols next to module names.", false);
-    public TextSetting openSymbol = new TextSetting("OpenGear", "Gear shown when module settings are collapsed", "=");
-    public TextSetting closeSymbol = new TextSetting("CloseGear", "Gear shown when module settings are expanded", "≡");
 
     @Override
     public void onEnable() {
