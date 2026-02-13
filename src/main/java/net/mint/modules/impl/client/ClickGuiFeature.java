@@ -35,6 +35,18 @@ public class ClickGuiFeature extends Feature {
             new Color(0, 0, 0),
             () -> moduleOutline.getValue()
     );
+    public BooleanSetting glowEffect = new BooleanSetting( // todo: optimize this
+            "Glow Effect",
+            "Enable a subtle fade-in glow from the left edge of each module.",
+            false
+    );
+
+    public ColorSetting glowColor = new ColorSetting(
+            "Glow Color",
+            "Color and transparency of the subtle glow effect.",
+            new Color(163, 255, 202, 100),
+            () -> glowEffect.getValue()
+    );
     public ColorSetting backgroundColor = new ColorSetting("Background", "GUI background color.", new Color(30, 30, 30, 150));
     public NumberSetting animationSpeed = new NumberSetting("Anim Speed", "Window open/close animation speed (ms).", 150, 50, 500);
     public BooleanSetting showGear = new BooleanSetting("Show Gear", "Show open/close symbols next to module names.", false);

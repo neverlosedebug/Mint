@@ -13,7 +13,6 @@ public final class CapesFeature extends Feature {
     private static final Identifier MINT_CAPE = Identifier.of("mint", "textures/mint.png");
     private static final Identifier PK_CAPE = Identifier.of("mint", "textures/pk.png");
     private static final Identifier EMP_CAPE = Identifier.of("mint", "textures/emp.png");
-
     private static final Identifier DOT5_CAPE = Identifier.of("mint", "textures/dot5.png");
     private static final Identifier SPOTIFY_CAPE = Identifier.of("mint", "textures/spotify.png");
     private static final Identifier BUTTERFLY_CAPE = Identifier.of("mint", "textures/butterfly.png");
@@ -71,7 +70,7 @@ public final class CapesFeature extends Feature {
             case "Butterfly" -> BUTTERFLY_CAPE;
             case "Highland" -> HIGHLAND_CAPE;
             case "HlDark" -> HLDARK_CAPE;
-            default          -> MINT_CAPE;
+            default -> MINT_CAPE;
         };
     }
 }

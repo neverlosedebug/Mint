@@ -91,6 +91,33 @@ public class FeatureButton extends Button {
             Renderer2D.renderQuad(context, x1, getY() + 0.5f, x2, getY() + super.getHeight() - 0.5f, barColor);
         }
 
+        /**
+         * @see ClickGuiFeature
+         */
+        if (clickGui.glowEffect.getValue()) {
+            float startX = getX() - 2.5f;
+            float endX = getX() + getWidth() / 2.0f;
+            float width = endX - startX;
+
+            if (width > 0) {
+                Color base = clickGui.glowColor.getColor();
+                int steps = 25;
+
+                for (int i = 0; i < steps; i++) {
+                    float progress = (float) i / steps;
+                    float x1 = startX + width * progress;
+                    float x2 = startX + width * ((float) (i + 1) / steps);
+
+                    float alphaFactor = 1.0f - progress * progress;
+                    int alpha = (int) (base.getAlpha() * alphaFactor);
+                    alpha = Math.max(0, Math.min(255, alpha));
+
+                    Color fadeColor = new Color(base.getRed(), base.getGreen(), base.getBlue(), alpha);
+                    Renderer2D.renderQuad(context, x1, getY() + 0.5f, x2, getY() + super.getHeight() - 0.5f, fadeColor);
+                }
+            }
+        }
+
         if (clickGui.moduleOutline.getValue()) {
             Color outlineColor = clickGui.outlineColor.getColor();
             Renderer2D.renderOutline(

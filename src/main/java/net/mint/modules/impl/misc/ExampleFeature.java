@@ -18,6 +18,9 @@ import java.awt.*;
 @FeatureInfo(name = "Example", category = Category.Misc)
 public class ExampleFeature extends Feature {
 
+    /**
+     * @see
+     */
     // Every setting, if structured correctly, will automatically register.
     public BooleanSetting exampleBool = new BooleanSetting("ExampleBoolean", "This is how you create a boolean.", true);
 

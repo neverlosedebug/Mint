@@ -55,7 +55,6 @@ public class Renderer2D implements Globals
 				0.0f, 1.0f, 0.0f, 1.0f, color.getRGB(), context.scissorStack.peekLast()));
 	}
 
-
 	public static void renderTexturedQuad(DrawContext context, Identifier texture, float left, float top, float right, float bottom, Color color) {
 		var tex = mc.getTextureManager().getTexture(texture);
 		GpuTextureView view = tex.getGlTextureView();
