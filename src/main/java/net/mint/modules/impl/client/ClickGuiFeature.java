@@ -47,6 +47,18 @@ public class ClickGuiFeature extends Feature {
             new Color(163, 255, 202, 100),
             () -> glowEffect.getValue()
     );
+    public BooleanSetting topGlow = new BooleanSetting(
+            "Top Glow",
+            "Show a smooth dark gradient below the window header.",
+            false
+    );
+
+    public ColorSetting topGlowColor = new ColorSetting(
+            "Top Glow Color",
+            "Color of the top glow effect (recommended: black with alpha).",
+            new Color(0, 0, 0, 100),
+            () -> topGlow.getValue()
+    );
     public BooleanSetting showGear = new BooleanSetting("Show Gear", "Show open/close symbols next to module names.", false);
     public TextSetting openSymbol = new TextSetting(
             "OpenGear",

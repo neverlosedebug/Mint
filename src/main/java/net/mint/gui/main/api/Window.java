@@ -80,6 +80,28 @@ public class Window {
             Color bg = clickGui.backgroundColor.getColor();
             Renderer2D.renderQuad(context, x, y + height, x + width, y + currentY + 1, bg);
 
+            if (clickGui.topGlow.getValue() && !buttons.isEmpty()) {
+                Color base = clickGui.topGlowColor.getColor();
+                float startY = y + height;
+                float endY = y + height + 12;
+
+                int steps = 16;
+                for (int i = 0; i < steps; i++) {
+                    float t1 = (float) i / steps;
+                    float t2 = (float) (i + 1) / steps;
+
+                    float y1 = startY + (endY - startY) * t1;
+                    float y2 = startY + (endY - startY) * t2;
+
+                    float alphaFactor = 1.0f - t1;
+                    int glowAlpha = (int) (base.getAlpha() * alphaFactor);
+                    glowAlpha = Math.max(0, Math.min(255, glowAlpha));
+
+                    Color fadeColor = new Color(base.getRed(), base.getGreen(), base.getBlue(), glowAlpha);
+                    Renderer2D.renderQuad(context, x, y1, x + width, y2, fadeColor);
+                }
+            }
+
             if (clickGui.outline.getValue()) {
                 Renderer2D.renderOutline(context, x, y + height, x + width, y + currentY + 1, ColorUtils.getGlobalColor(200));
                 Renderer2D.renderOutline(context, x, y + height, x + width, y + currentY + 1, new Color(0, 0, 0, alpha));
