@@ -14,6 +14,13 @@ public class ClickGuiFeature extends Feature {
 
     public BooleanSetting sounds = new BooleanSetting("Sounds", "Custom sounds when enabling or disabling modules.", false);
     public BooleanSetting outline = new BooleanSetting("Outline", "Enable window outline.", true);
+    public NumberSetting buttonHeight = new NumberSetting(
+            "Button Height",
+            "Height of each module button in the ClickGUI.",
+            13.0,
+            1.0,
+            30.0
+    );
     public BooleanSetting accentBar = new BooleanSetting("Accent Bar", "Show a colored accent bar next to each module.", false);
     public ColorSetting accentColor = new ColorSetting(
             "Accent Color",
@@ -84,6 +91,7 @@ public class ClickGuiFeature extends Feature {
             if (value) {
                 sounds.setValue(false);
                 outline.setValue(true);
+                buttonHeight.setValue(13.0);
                 accentBar.setValue(false);
                 accentColor.setValue(new Color(163, 255, 202));
                 accentSide.setValue("Left");

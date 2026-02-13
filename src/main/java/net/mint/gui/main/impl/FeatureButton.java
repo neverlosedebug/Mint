@@ -68,16 +68,39 @@ public class FeatureButton extends Button {
 
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
-        Renderer2D.renderQuad(context, getX() - 2.5f, getY() + 0.5f, getX() + getWidth() + 2.5f, getY() + super.getHeight() - 0.5f, ColorUtils.getGlobalColor((int) animation.get(feature.isEnabled() ? 200 : 0)));
+        ClickGuiFeature clickGui = Managers.FEATURE.getFeatureFromClass(ClickGuiFeature.class);
+        float buttonHeight = clickGui.buttonHeight.getValue().floatValue();
+
+        Renderer2D.renderQuad(
+                context,
+                getX() - 2.5f,
+                getY() + 0.5f,
+                getX() + getWidth() + 2.5f,
+                getY() + buttonHeight - 0.5f,
+                ColorUtils.getGlobalColor((int) animation.get(feature.isEnabled() ? 200 : 0))
+        );
 
         int moduleAlpha = (int) getHoverAnimation().get(isHovering(mouseX, mouseY) ? 75 : 0);
-        Renderer2D.renderQuad(context, getX() - 2.5f, getY() + 0.5f, getX() + getWidth() + 2.5f, getY() + super.getHeight() - 0.5f, new Color(0, 0, 0, moduleAlpha));
+        Renderer2D.renderQuad(
+                context,
+                getX() - 2.5f,
+                getY() + 0.5f,
+                getX() + getWidth() + 2.5f,
+                getY() + buttonHeight - 0.5f,
+                new Color(0, 0, 0, moduleAlpha)
+        );
 
         if (searchMatch) {
-            Renderer2D.renderOutline(context, getX() - 2.5f, getY() + 0.5f, getX() + getWidth() + 2.5f, getY() + super.getHeight() - 0.5f, new Color(100, 180, 255, 200));
+            Renderer2D.renderOutline(
+                    context,
+                    getX() - 2.5f,
+                    getY() + 0.5f,
+                    getX() + getWidth() + 2.5f,
+                    getY() + buttonHeight - 0.5f,
+                    new Color(100, 180, 255, 200)
+            );
         }
 
-        ClickGuiFeature clickGui = Managers.FEATURE.getFeatureFromClass(ClickGuiFeature.class);
         if (clickGui.accentBar.getValue()) {
             Color barColor = clickGui.accentColor.getColor();
             float x1, x2;
@@ -88,12 +111,9 @@ public class FeatureButton extends Button {
                 x1 = getX() - 2.5f;
                 x2 = getX() - 1.5f;
             }
-            Renderer2D.renderQuad(context, x1, getY() + 0.5f, x2, getY() + super.getHeight() - 0.5f, barColor);
+            Renderer2D.renderQuad(context, x1, getY() + 0.5f, x2, getY() + buttonHeight - 0.5f, barColor);
         }
 
-        /**
-         * @see ClickGuiFeature
-         */
         if (clickGui.glowEffect.getValue()) {
             float startX = getX() - 2.5f;
             float endX = getX() + getWidth() / 2.0f;
@@ -113,7 +133,7 @@ public class FeatureButton extends Button {
                     alpha = Math.max(0, Math.min(255, alpha));
 
                     Color fadeColor = new Color(base.getRed(), base.getGreen(), base.getBlue(), alpha);
-                    Renderer2D.renderQuad(context, x1, getY() + 0.5f, x2, getY() + super.getHeight() - 0.5f, fadeColor);
+                    Renderer2D.renderQuad(context, x1, getY() + 0.5f, x2, getY() + buttonHeight - 0.5f, fadeColor);
                 }
             }
         }
@@ -125,29 +145,29 @@ public class FeatureButton extends Button {
                     getX() - 2.5f,
                     getY() + 0.5f,
                     getX() + getWidth() + 2.5f,
-                    getY() + super.getHeight() - 0.5f,
+                    getY() + buttonHeight - 0.5f,
                     outlineColor
             );
         }
 
         if (clickGui.showGear.getValue()) {
             String symbol = open ? clickGui.closeSymbol.getValue() : clickGui.openSymbol.getValue();
-            drawTextWithShadow(context, symbol, getX() + getWidth() - 10, getY() + getVerticalPadding(), Color.WHITE);
+            float gearY = getY() + (buttonHeight / 2.0f) - (FontUtils.getHeight() / 2.0f) + 1;
+            drawTextWithShadow(context, symbol, getX() + getWidth() - 10, gearY, Color.WHITE);
         }
 
+        float textY = getY() + (buttonHeight / 2.0f) - (FontUtils.getHeight() / 2.0f) + 1;
         float tuffX = xAnimation.get(open ? getX() + getWidth() / 2 - (FontUtils.getWidth(feature.getName()) / 2.0F) : getX());
-        drawTextWithShadow(context, feature.getName(), tuffX, getY() + getVerticalPadding(), getTextColor(textAnimation, feature.isEnabled()));
+        drawTextWithShadow(context, feature.getName(), tuffX, textY, getTextColor(textAnimation, feature.isEnabled()));
 
-        float currentY = super.getHeight();
+        float currentY = buttonHeight;
         float targetY = 0;
 
         for (Button button : buttons) {
-            if (!button.getSetting().isVisible())
-                continue;
+            if (!button.getSetting().isVisible()) continue;
 
             button.setX(getX());
             button.setY(getY() + currentY);
-
             currentY += button.getHeight();
             targetY += button.getHeight();
         }
@@ -155,10 +175,31 @@ public class FeatureButton extends Button {
         float scale = Easing.toDelta(openTime, 150);
 
         if (open || scale != 1.0f) {
-            if (scale != 1.0f) context.enableScissor((int) (getX() - 2.5f), (int) (getY() + super.getHeight() - 0.5f), (int) (getX() + getWidth()), (int) (getY() + super.getHeight() + (targetY * (open ? scale : 1.0f - scale))));
+            if (scale != 1.0f) {
+                context.enableScissor(
+                        (int) (getX() - 2.5f),
+                        (int) (getY() + buttonHeight - 0.5f),
+                        (int) (getX() + getWidth() + 2.5f),
+                        (int) (getY() + buttonHeight + (targetY * (open ? scale : 1.0f - scale)))
+                );
+            }
 
-            Renderer2D.renderQuad(context, getX() - 2.5f, getY() + super.getHeight() - 0.5f, getX() - 1.5f, getY() + super.getHeight() - 0.5f + (targetY * (open ? scale : 1.0f - scale)), ColorUtils.getGlobalColor(200));
-            Renderer2D.renderQuad(context, getX() - 2.5f, getY() + super.getHeight() - 0.5f, getX() - 1.5f, getY() + super.getHeight() - 0.5f + (targetY * (open ? scale : 1.0f - scale)), new Color(0, 0, 0, moduleAlpha));
+            Renderer2D.renderQuad(
+                    context,
+                    getX() - 2.5f,
+                    getY() + buttonHeight - 0.5f,
+                    getX() - 1.5f,
+                    getY() + buttonHeight - 0.5f + (targetY * (open ? scale : 1.0f - scale)),
+                    ColorUtils.getGlobalColor(200)
+            );
+            Renderer2D.renderQuad(
+                    context,
+                    getX() - 2.5f,
+                    getY() + buttonHeight - 0.5f,
+                    getX() - 1.5f,
+                    getY() + buttonHeight - 0.5f + (targetY * (open ? scale : 1.0f - scale)),
+                    new Color(0, 0, 0, moduleAlpha)
+            );
 
             context.getMatrices().pushMatrix();
             context.getMatrices().translate(0, -targetY + (targetY * (open ? scale : 1.0f - scale)));
@@ -167,15 +208,23 @@ public class FeatureButton extends Button {
                 if (!button.getSetting().isVisible()) continue;
 
                 int alpha = (int) button.getHoverAnimation().get(button.isHovering(mouseX, mouseY) ? 75 : 0);
-                Renderer2D.renderQuad(context, button.getX() - 1, button.getY(), button.getX() + button.getWidth() + 2.5f, button.getY() + super.getHeight(), new Color(0, 0, 0, alpha));
+                Renderer2D.renderQuad(
+                        context,
+                        button.getX() - 1,
+                        button.getY(),
+                        button.getX() + button.getWidth() + 2.5f,
+                        button.getY() + button.getHeight(),
+                        new Color(0, 0, 0, alpha)
+                );
 
                 button.render(context, mouseX, mouseY, delta);
             }
 
             context.getMatrices().popMatrix();
 
-            if (scale != 1.0f)
+            if (scale != 1.0f) {
                 context.disableScissor();
+            }
         }
 
         currentProgress = targetY * (open ? scale : 1.0f - scale);
@@ -190,14 +239,14 @@ public class FeatureButton extends Button {
     public void mouseClicked(double mouseX, double mouseY, int button) {
         if (isHovering(mouseX, mouseY)) {
             if (button == 0) {
-                if (Managers.FEATURE.getFeatureFromClass(ClickGuiFeature.class).sounds.getValue()) {
+                ClickGuiFeature clickGui = Managers.FEATURE.getFeatureFromClass(ClickGuiFeature.class);
+                if (clickGui.sounds.getValue()) {
                     if (feature.isEnabled()) {
                         SoundUtils.playSound("disabled.wav", 67);
                     } else {
                         SoundUtils.playSound("enabled.wav", 67);
                     }
                 }
-
                 feature.setEnabled(!feature.isEnabled());
             } else if (button == 1) {
                 open = !open;
@@ -205,12 +254,18 @@ public class FeatureButton extends Button {
             }
         }
 
-        if (open) buttons.stream().filter(b -> b.getSetting().isVisible()).forEach(b -> b.mouseClicked(mouseX, mouseY, button));
+        if (open) {
+            buttons.stream()
+                    .filter(b -> b.getSetting().isVisible())
+                    .forEach(b -> b.mouseClicked(mouseX, mouseY, button));
+        }
     }
 
     @Override
     public void mouseReleased(double mouseX, double mouseY, int button) {
-        buttons.stream().filter(b -> b.getSetting().isVisible()).forEach(b -> b.mouseReleased(mouseX, mouseY, button));
+        buttons.stream()
+                .filter(b -> b.getSetting().isVisible())
+                .forEach(b -> b.mouseReleased(mouseX, mouseY, button));
     }
 
     @Override
@@ -228,16 +283,25 @@ public class FeatureButton extends Button {
 
     @Override
     public void keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (open) buttons.stream().filter(b -> b.getSetting().isVisible()).forEach(b -> b.keyPressed(keyCode, scanCode, modifiers));
+        if (open) {
+            buttons.stream()
+                    .filter(b -> b.getSetting().isVisible())
+                    .forEach(b -> b.keyPressed(keyCode, scanCode, modifiers));
+        }
     }
 
     @Override
     public void charTyped(char chr, int modifiers) {
-        if (open) buttons.stream().filter(b -> b.getSetting().isVisible()).forEach(b -> b.charTyped(chr, modifiers));
+        if (open) {
+            buttons.stream()
+                    .filter(b -> b.getSetting().isVisible())
+                    .forEach(b -> b.charTyped(chr, modifiers));
+        }
     }
 
     @Override
     public float getHeight() {
-        return super.getHeight() + currentProgress;
+        ClickGuiFeature gui = Managers.FEATURE.getFeatureFromClass(ClickGuiFeature.class);
+        return gui.buttonHeight.getValue().floatValue() + currentProgress;
     }
 }
