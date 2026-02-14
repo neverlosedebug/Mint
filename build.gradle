@@ -55,7 +55,6 @@ buildConfig {
     className("BuildConstants")
     packageName(group)
     buildConfigField(String, 'MOD_VERSION', project.mod_version)
-    buildConfigField(String, 'MINECRAFT_VERSION', project.minecraft_version)
     buildConfigField(String, 'GIT_HASH', getCommitHash())
     buildConfigField(String, 'GIT_REVISION', getRevisionCount())
 }
