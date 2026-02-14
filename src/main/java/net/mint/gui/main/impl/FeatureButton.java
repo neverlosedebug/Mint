@@ -70,6 +70,8 @@ public class FeatureButton extends Button {
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
         ClickGuiFeature clickGui = Managers.FEATURE.getFeatureFromClass(ClickGuiFeature.class);
         float buttonHeight = clickGui.buttonHeight.getValue().floatValue();
+        float guiWidth = clickGui.guiWidth.getValue().floatValue();
+        setWidth(guiWidth);
 
         Renderer2D.renderQuad(
                 context,
