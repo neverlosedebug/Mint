@@ -1,6 +1,7 @@
 package net.mint.utils.miscellaneous.irc;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import net.mint.Manager;
@@ -36,10 +37,15 @@ public final class BotManager extends Manager implements Globals {
         INSTANCE = this;
         Managers.BOT = this;
         loadAuthData();
+        loadMintUsers();
     }
 
     private Path getAuthFile() {
         return getMinecraftDir().resolve("mint").resolve("auth.json");
+    }
+
+    private Path getMintUsersFile() {
+        return getMinecraftDir().resolve("mint").resolve("mintusers.json");
     }
 
     private Path getLogFile() {
@@ -72,6 +78,37 @@ public final class BotManager extends Manager implements Globals {
         }
     }
 
+    private void loadMintUsers() {
+        try {
+            Path usersFile = getMintUsersFile();
+            if (!Files.exists(usersFile)) {
+                createDefaultMintUsersFile();
+                return;
+            }
+
+            String content = Files.readString(usersFile);
+            JsonArray jsonArray = new Gson().fromJson(content, JsonArray.class);
+
+            if (jsonArray != null) {
+                for (int i = 0; i < jsonArray.size(); i++) {
+                    JsonObject userObj = jsonArray.get(i).getAsJsonObject();
+                    if (userObj.has("uuid") && userObj.has("name")) {
+                        try {
+                            UUID uuid = UUID.fromString(userObj.get("uuid").getAsString());
+                            String name = userObj.get("name").getAsString();
+                            mintUsers.add(uuid);
+                            mintByUuid.put(uuid, name);
+                        } catch (IllegalArgumentException e) {
+                            System.err.println("[BotManager] Invalid UUID in mintusers.json: " + userObj.get("uuid").getAsString());
+                        }
+                    }
+                }
+            }
+        } catch (IOException | JsonParseException e) {
+            System.err.println("[BotManager] Failed to load mintusers.json: " + e.getMessage());
+        }
+    }
+
     private void createDefaultAuthFile() {
         try {
             Path authFile = getAuthFile();
@@ -81,6 +118,18 @@ public final class BotManager extends Manager implements Globals {
             System.out.println("[BotManager] Created default auth.json at: " + authFile.toAbsolutePath());
         } catch (IOException e) {
             System.err.println("[BotManager] Could not create auth.json: " + e.getMessage());
+        }
+    }
+
+    private void createDefaultMintUsersFile() {
+        try {
+            Path usersFile = getMintUsersFile();
+            Files.createDirectories(usersFile.getParent());
+            String defaultContent = "[\n  {\n    \"uuid\": \"00000000-0000-0000-0000-000000000000\",\n    \"name\": \"ExamplePlayer\"\n  }\n]";
+            Files.writeString(usersFile, defaultContent);
+            System.out.println("[BotManager] Created default mintusers.json at: " + usersFile.toAbsolutePath());
+        } catch (IOException e) {
+            System.err.println("[BotManager] Could not create mintusers.json: " + e.getMessage());
         }
     }
 
@@ -137,11 +186,30 @@ public final class BotManager extends Manager implements Globals {
     public void updateMintUser(UUID uuid, String mintName) {
         mintUsers.add(uuid);
         mintByUuid.put(uuid, mintName);
+        saveMintUsers();
     }
 
     public void removeMintUser(UUID uuid) {
         mintUsers.remove(uuid);
         mintByUuid.remove(uuid);
+        saveMintUsers();
+    }
+
+    private void saveMintUsers() {
+        try {
+            Path usersFile = getMintUsersFile();
+            Files.createDirectories(usersFile.getParent());
+            JsonArray jsonArray = new JsonArray();
+            for (UUID uuid : mintUsers) {
+                JsonObject obj = new JsonObject();
+                obj.addProperty("uuid", uuid.toString());
+                obj.addProperty("name", mintByUuid.getOrDefault(uuid, "Unknown"));
+                jsonArray.add(obj);
+            }
+            Files.writeString(usersFile, new Gson().toJson(jsonArray));
+        } catch (IOException e) {
+            System.err.println("[BotManager] Failed to save mintusers.json: " + e.getMessage());
+        }
     }
 
     public void sendPingString() {

@@ -15,6 +15,7 @@ import java.util.UUID;
 public class FakePlayerCommand extends Command {
 
     private OtherClientPlayerEntity fakePlayer = null;
+    private static final UUID FAKE_PLAYER_UUID = UUID.fromString("00000000-0000-0000-0000-000000000069");
 
     @Override
     public void onCommand(String[] args) {
@@ -40,7 +41,7 @@ public class FakePlayerCommand extends Command {
             }
         }
 
-        fakePlayer = new OtherClientPlayerEntity(mc.world, new GameProfile(UUID.randomUUID(), name));
+        fakePlayer = new OtherClientPlayerEntity(mc.world, new GameProfile(FAKE_PLAYER_UUID, name));
         fakePlayer.copyPositionAndRotation(mc.player);
         fakePlayer.copyFrom(mc.player);
         fakePlayer.setId(-696969);
@@ -61,9 +62,13 @@ public class FakePlayerCommand extends Command {
         }
 
         damage(0.5f);
+
+        fakePlayer.copyFrom(mc.player);
+        fakePlayer.setCustomNameVisible(true);
     }
 
     public void damage(float amount) {
+        if (fakePlayer == null) return;
         float newHealth = fakePlayer.getHealth() - amount;
         if (newHealth <= 0) {
             fakePlayer.setHealth(0.5f);
