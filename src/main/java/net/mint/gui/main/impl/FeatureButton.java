@@ -34,6 +34,11 @@ public class FeatureButton extends Button {
     private boolean open = false;
     private boolean searchMatch = false;
 
+    // Кеш для эффекта свечения
+    private Color[] glowCache = null;
+    private Color lastGlowColor = null;
+    private static final int GLOW_STEPS = 12; // Уменьшено с 25 до 12
+
     public FeatureButton(Feature feature, Window window) {
         super(window);
         this.feature = feature;
@@ -66,78 +71,91 @@ public class FeatureButton extends Button {
         return searchMatch;
     }
 
+    // Метод для предварительного расчета градиента свечения
+    private void updateGlowCache(Color baseColor) {
+        if (glowCache == null || !baseColor.equals(lastGlowColor)) {
+            glowCache = new Color[GLOW_STEPS];
+            lastGlowColor = baseColor;
+
+            for (int i = 0; i < GLOW_STEPS; i++) {
+                float progress = (float) i / GLOW_STEPS;
+                float alphaFactor = 1.0f - progress * progress;
+                int alpha = (int) (baseColor.getAlpha() * alphaFactor);
+                alpha = Math.max(0, Math.min(255, alpha));
+
+                glowCache[i] = new Color(baseColor.getRed(), baseColor.getGreen(), baseColor.getBlue(), alpha);
+            }
+        }
+    }
+
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
-        Renderer2D.renderQuad(context, getX() - 2.5f, getY() + 0.5f, getX() + getWidth() + 2.5f, getY() + super.getHeight() - 0.5f, ColorUtils.getGlobalColor((int) animation.get(feature.isEnabled() ? 200 : 0)));
+        float x1 = getX() - 2.5f;
+        float y1 = getY() + 0.5f;
+        float x2 = getX() + getWidth() + 2.5f;
+        float y2 = getY() + super.getHeight() - 0.5f;
+
+        Renderer2D.renderQuad(context, x1, y1, x2, y2, ColorUtils.getGlobalColor((int) animation.get(feature.isEnabled() ? 200 : 0)));
 
         int moduleAlpha = (int) getHoverAnimation().get(isHovering(mouseX, mouseY) ? 75 : 0);
-        Renderer2D.renderQuad(context, getX() - 2.5f, getY() + 0.5f, getX() + getWidth() + 2.5f, getY() + super.getHeight() - 0.5f, new Color(0, 0, 0, moduleAlpha));
+        Renderer2D.renderQuad(context, x1, y1, x2, y2, new Color(0, 0, 0, moduleAlpha));
 
         if (searchMatch) {
-            Renderer2D.renderOutline(context, getX() - 2.5f, getY() + 0.5f, getX() + getWidth() + 2.5f, getY() + super.getHeight() - 0.5f, new Color(100, 180, 255, 200));
+            Renderer2D.renderOutline(context, x1, y1, x2, y2, new Color(100, 180, 255, 200));
         }
 
         ClickGuiFeature clickGui = Managers.FEATURE.getFeatureFromClass(ClickGuiFeature.class);
+
+        // Accent bar
         if (clickGui.accentBar.getValue()) {
             Color barColor = clickGui.accentColor.getColor();
-            float x1, x2;
+            float barX1, barX2;
             if ("Right".equals(clickGui.accentSide.getValue())) {
-                x1 = getX() + getWidth() + 1.5f;
-                x2 = getX() + getWidth() + 2.5f;
+                barX1 = getX() + getWidth() + 1.5f;
+                barX2 = getX() + getWidth() + 2.5f;
             } else {
-                x1 = getX() - 2.5f;
-                x2 = getX() - 1.5f;
+                barX1 = getX() - 2.5f;
+                barX2 = getX() - 1.5f;
             }
-            Renderer2D.renderQuad(context, x1, getY() + 0.5f, x2, getY() + super.getHeight() - 0.5f, barColor);
+            Renderer2D.renderQuad(context, barX1, y1, barX2, y2, barColor);
         }
 
-        /**
-         * @see ClickGuiFeature
-         */
+        // Оптимизированный эффект свечения
         if (clickGui.glowEffect.getValue()) {
-            float startX = getX() - 2.5f;
+            Color glowColor = clickGui.glowColor.getColor();
+            updateGlowCache(glowColor);
+
+            float startX = x1;
             float endX = getX() + getWidth() / 2.0f;
             float width = endX - startX;
 
             if (width > 0) {
-                Color base = clickGui.glowColor.getColor();
-                int steps = 25;
+                float stepWidth = width / GLOW_STEPS;
 
-                for (int i = 0; i < steps; i++) {
-                    float progress = (float) i / steps;
-                    float x1 = startX + width * progress;
-                    float x2 = startX + width * ((float) (i + 1) / steps);
-
-                    float alphaFactor = 1.0f - progress * progress;
-                    int alpha = (int) (base.getAlpha() * alphaFactor);
-                    alpha = Math.max(0, Math.min(255, alpha));
-
-                    Color fadeColor = new Color(base.getRed(), base.getGreen(), base.getBlue(), alpha);
-                    Renderer2D.renderQuad(context, x1, getY() + 0.5f, x2, getY() + super.getHeight() - 0.5f, fadeColor);
+                for (int i = 0; i < GLOW_STEPS; i++) {
+                    float quadX1 = startX + stepWidth * i;
+                    float quadX2 = startX + stepWidth * (i + 1);
+                    Renderer2D.renderQuad(context, quadX1, y1, quadX2, y2, glowCache[i]);
                 }
             }
         }
 
+        // Module outline
         if (clickGui.moduleOutline.getValue()) {
-            Color outlineColor = clickGui.outlineColor.getColor();
-            Renderer2D.renderOutline(
-                    context,
-                    getX() - 2.5f,
-                    getY() + 0.5f,
-                    getX() + getWidth() + 2.5f,
-                    getY() + super.getHeight() - 0.5f,
-                    outlineColor
-            );
+            Renderer2D.renderOutline(context, x1, y1, x2, y2, clickGui.outlineColor.getColor());
         }
 
+        // Gear symbol
         if (clickGui.showGear.getValue()) {
             String symbol = open ? clickGui.closeSymbol.getValue() : clickGui.openSymbol.getValue();
             drawTextWithShadow(context, symbol, getX() + getWidth() - 10, getY() + getVerticalPadding(), Color.WHITE);
         }
 
+        // Module name
         float tuffX = xAnimation.get(open ? getX() + getWidth() / 2 - (FontUtils.getWidth(feature.getName()) / 2.0F) : getX());
         drawTextWithShadow(context, feature.getName(), tuffX, getY() + getVerticalPadding(), getTextColor(textAnimation, feature.isEnabled()));
 
+        // Calculate settings buttons positions
         float currentY = super.getHeight();
         float targetY = 0;
 
@@ -154,14 +172,24 @@ public class FeatureButton extends Button {
 
         float scale = Easing.toDelta(openTime, 150);
 
+        // Render settings buttons
         if (open || scale != 1.0f) {
-            if (scale != 1.0f) context.enableScissor((int) (getX() - 2.5f), (int) (getY() + super.getHeight() - 0.5f), (int) (getX() + getWidth()), (int) (getY() + super.getHeight() + (targetY * (open ? scale : 1.0f - scale))));
+            float scaledHeight = targetY * (open ? scale : 1.0f - scale);
 
-            Renderer2D.renderQuad(context, getX() - 2.5f, getY() + super.getHeight() - 0.5f, getX() - 1.5f, getY() + super.getHeight() - 0.5f + (targetY * (open ? scale : 1.0f - scale)), ColorUtils.getGlobalColor(200));
-            Renderer2D.renderQuad(context, getX() - 2.5f, getY() + super.getHeight() - 0.5f, getX() - 1.5f, getY() + super.getHeight() - 0.5f + (targetY * (open ? scale : 1.0f - scale)), new Color(0, 0, 0, moduleAlpha));
+            if (scale != 1.0f) {
+                context.enableScissor(
+                        (int) x1,
+                        (int) (getY() + super.getHeight() - 0.5f),
+                        (int) (getX() + getWidth()),
+                        (int) (getY() + super.getHeight() + scaledHeight)
+                );
+            }
+
+            Renderer2D.renderQuad(context, x1, getY() + super.getHeight() - 0.5f, getX() - 1.5f, getY() + super.getHeight() - 0.5f + scaledHeight, ColorUtils.getGlobalColor(200));
+            Renderer2D.renderQuad(context, x1, getY() + super.getHeight() - 0.5f, getX() - 1.5f, getY() + super.getHeight() - 0.5f + scaledHeight, new Color(0, 0, 0, moduleAlpha));
 
             context.getMatrices().pushMatrix();
-            context.getMatrices().translate(0, -targetY + (targetY * (open ? scale : 1.0f - scale)));
+            context.getMatrices().translate(0, -targetY + scaledHeight);
 
             for (Button button : buttons) {
                 if (!button.getSetting().isVisible()) continue;
@@ -176,9 +204,11 @@ public class FeatureButton extends Button {
 
             if (scale != 1.0f)
                 context.disableScissor();
-        }
 
-        currentProgress = targetY * (open ? scale : 1.0f - scale);
+            currentProgress = scaledHeight;
+        } else {
+            currentProgress = 0;
+        }
     }
 
     @Override
