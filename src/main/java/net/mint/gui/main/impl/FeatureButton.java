@@ -53,7 +53,8 @@ public class FeatureButton extends Button {
                 case ColorSetting setting -> buttons.add(new ColorButton(setting, window));
                 case TextSetting setting -> buttons.add(new StringButton(setting, window));
                 case WhitelistSetting setting -> buttons.add(new WhitelistButton(setting, window));
-                default -> {}
+                default -> {
+                }
             }
         }
     }
@@ -235,7 +236,8 @@ public class FeatureButton extends Button {
             }
         }
 
-        if (open) buttons.stream().filter(b -> b.getSetting().isVisible()).forEach(b -> b.mouseClicked(mouseX, mouseY, button));
+        if (open)
+            buttons.stream().filter(b -> b.getSetting().isVisible()).forEach(b -> b.mouseClicked(mouseX, mouseY, button));
     }
 
     @Override
@@ -258,7 +260,8 @@ public class FeatureButton extends Button {
 
     @Override
     public void keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (open) buttons.stream().filter(b -> b.getSetting().isVisible()).forEach(b -> b.keyPressed(keyCode, scanCode, modifiers));
+        if (open)
+            buttons.stream().filter(b -> b.getSetting().isVisible()).forEach(b -> b.keyPressed(keyCode, scanCode, modifiers));
     }
 
     @Override
