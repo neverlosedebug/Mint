@@ -124,8 +124,8 @@ public class NotificationsFeature extends Feature {
 
         sendWindowsNotification(playerName + " entered visual range", "", TrayIcon.MessageType.INFO);
     }
-
-    // иди наху
+    // сука помогите я не знаю че это за хуйня как это камитнуть
+    // иди нахуй
     private void sendWindowsNotification(String title, String message, TrayIcon.MessageType type) {
         try {
             if (!SystemTray.isSupported()) return;
