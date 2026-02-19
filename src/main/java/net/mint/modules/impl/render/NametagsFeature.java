@@ -41,7 +41,7 @@ public class NametagsFeature extends Feature {
 
     public final WhitelistSetting display = new WhitelistSetting("Display", "Data to show on the nametag", WhitelistSetting.Type.CUSTOM, new String[]{}, new String[]{"GameMode", "Ping", "EntityID", "Health", "TotemPops", "Armor"});
 
-    public ModeSetting telemetry = new ModeSetting("Telemetry", "Signicates Mint via some cool methods.", "Symbol", new String[]{"None", "Symbol", "Name", "Both"});
+    public ModeSetting telemetry = new ModeSetting("Telemetry", "Indicates Mint users via local logic.", "Symbol", new String[]{"None", "Symbol", "Name", "Both"});
 
     public BooleanSetting durability = new BooleanSetting("Durability", "Displays armor durability above each piece.", false,
             () -> display.getWhitelistIds().contains("Armor"));
@@ -75,21 +75,19 @@ public class NametagsFeature extends Feature {
             String ign = player.getName().getString();
             UUID uuid = player.getUuid();
 
-            boolean isMint = false;
-            String mintName = null;
-            if (BotManager.INSTANCE != null && player != mc.player) {
-                isMint = BotManager.INSTANCE.isMintUser(uuid);
-                if (isMint) {
-                    mintName = BotManager.INSTANCE.getMintNameFor(uuid);
-                }
+            boolean isMint = isLocalMintUser(player);
+            String mintValue = null;
+
+            if (isMint) {
+                mintValue = ign;
             }
 
             String mode = telemetry.getValue();
             String shownName = ign;
 
             if (isMint && ("Name".equalsIgnoreCase(mode) || "Both".equalsIgnoreCase(mode))) {
-                if (mintName != null && !mintName.trim().isEmpty()) {
-                    shownName = mintName.trim();
+                if (mintValue != null && !mintValue.trim().isEmpty()) {
+                    shownName = mintValue.trim();
                 }
             }
 
@@ -135,7 +133,7 @@ public class NametagsFeature extends Feature {
                 Renderer2D.renderOutline(event.getContext(), -width / 2f - 1, -FontUtils.getHeight() - 2, width / 2 + 2, 0, outlineColor.getColor());
             }
 
-            FontUtils.drawTextWithShadow(event.getContext(), text, -FontUtils.getWidth(text) / 2.f, -FontUtils.getHeight(), getNameColor(player));
+            FontUtils.drawTextWithShadow(event.getContext(), text, -FontUtils.getWidth(text) / 2.f, -FontUtils.getHeight(), getNameColor(player, isMint));
 
             if (display.getWhitelistIds().contains("Armor")) {
                 List<ItemStack> stacks = new ArrayList<>();
@@ -200,7 +198,7 @@ public class NametagsFeature extends Feature {
 
                 String name = stack.getName().getString();
                 int count = stack.getCount();
-                String display = name + (count > 1 ? " x" + count : "");
+                String displayText = name + (count > 1 ? " x" + count : "");
 
                 float scale = 1.0f;
                 if (scaling.getValue()) {
@@ -211,7 +209,7 @@ public class NametagsFeature extends Feature {
                 matrices.pushMatrix();
                 matrices.translate((float) proj.x, (float) proj.y);
                 matrices.scale(scale, scale);
-                FontUtils.drawTextWithShadow(event.getContext(), display, -FontUtils.getWidth(display) / 2f, -FontUtils.getHeight(), miscColor.getColor());
+                FontUtils.drawTextWithShadow(event.getContext(), displayText, -FontUtils.getWidth(displayText) / 2f, -FontUtils.getHeight(), miscColor.getColor());
                 matrices.popMatrix();
             }
         }
@@ -224,7 +222,7 @@ public class NametagsFeature extends Feature {
                 if (!Renderer3D.projectionVisible(proj)) continue;
 
                 if (pearl.getOwner() instanceof PlayerEntity thrower) {
-                    String display = thrower.getName().getString();
+                    String displayText = thrower.getName().getString();
 
                     float scale = 1.0f;
                     if (scaling.getValue()) {
@@ -235,17 +233,32 @@ public class NametagsFeature extends Feature {
                     matrices.pushMatrix();
                     matrices.translate((float) proj.x, (float) proj.y);
                     matrices.scale(scale, scale);
-                    FontUtils.drawTextWithShadow(event.getContext(), display, -FontUtils.getWidth(display) / 2f, -FontUtils.getHeight(), miscColor.getColor());
+                    FontUtils.drawTextWithShadow(event.getContext(), displayText, -FontUtils.getWidth(displayText) / 2f, -FontUtils.getHeight(), miscColor.getColor());
                     matrices.popMatrix();
                 }
             }
         }
     }
 
-    private Color getNameColor(PlayerEntity player) {
+    private boolean isLocalMintUser(PlayerEntity player) {
+        UUID uuid = player.getUuid();
+
+        if (BotManager.INSTANCE != null && BotManager.INSTANCE.isMintUser(uuid)) {
+            return true;
+        }
+
+        if (player == mc.player) {
+            return true;
+        }
+
+        return false;
+    }
+
+    private Color getNameColor(PlayerEntity player, boolean isMintOverride) {
         if (player.isSneaking()) return new Color(255, 170, 0);
         if (player.getId() == -696969) return new Color(225, 0, 70);
-        if (BotManager.INSTANCE != null && BotManager.INSTANCE.isMintUser(player.getUuid())) {
+
+        if (isMintOverride) {
             return new Color(0, 200, 255);
         }
 

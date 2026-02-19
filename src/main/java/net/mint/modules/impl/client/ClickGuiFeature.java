@@ -14,67 +14,22 @@ public class ClickGuiFeature extends Feature {
 
     public BooleanSetting sounds = new BooleanSetting("Sounds", "Custom sounds when enabling or disabling modules.", false);
     public BooleanSetting outline = new BooleanSetting("Outline", "Enable window outline.", true);
+    public NumberSetting buttonHeight = new NumberSetting("Button Height", "Height of each module button in the ClickGUI.", 13.0, 1.0, 30.0);
+    public NumberSetting guiWidth = new NumberSetting("GUI Width", "Width of the ClickGUI windows.", 92.0, 80.0, 250.0);
     public BooleanSetting accentBar = new BooleanSetting("Accent Bar", "Show a colored accent bar next to each module.", false);
-    public ColorSetting accentColor = new ColorSetting(
-            "Accent Color",
-            "Color of the module accent bar.",
-            new Color(163, 255, 202),
-            () -> accentBar.getValue()
-    );
-    public ModeSetting accentSide = new ModeSetting(
-            "Accent Side",
-            "Position of the accent bar.",
-            "Left",
-            new String[]{"Left", "Right"},
-            () -> accentBar.getValue()
-    );
+    public ColorSetting accentColor = new ColorSetting("Accent Color", "Color of the module accent bar.", new Color(163, 255, 202), () -> accentBar.getValue());
+    public ModeSetting accentSide = new ModeSetting("Accent Side", "Position of the accent bar.", "Left", new String[]{"Left", "Right"}, () -> accentBar.getValue());
     public BooleanSetting moduleOutline = new BooleanSetting("Module Outline", "Show a colored outline around each module.", true);
-    public ColorSetting outlineColor = new ColorSetting(
-            "Outline Color",
-            "Color of the module outline.",
-            new Color(0, 0, 0),
-            () -> moduleOutline.getValue()
-    );
+    public ColorSetting outlineColor = new ColorSetting("Outline Color", "Color of the module outline.", new Color(0, 0, 0), () -> moduleOutline.getValue());
     public ColorSetting enabledTextColor = new ColorSetting("Enabled Text", "Color of enabled module names.", Color.WHITE);
     public ColorSetting disabledTextColor = new ColorSetting("Disabled Text", "Color of disabled module names.", new Color(192, 192, 192));
-    public BooleanSetting glowEffect = new BooleanSetting( // todo: optimize this
-            "Glow Effect",
-            "Enable a subtle fade-in glow from the left edge of each module.",
-            false
-    );
-
-    public ColorSetting glowColor = new ColorSetting(
-            "Glow Color",
-            "Color and transparency of the subtle glow effect.",
-            new Color(163, 255, 202, 100),
-            () -> glowEffect.getValue()
-    );
-    public BooleanSetting topGlow = new BooleanSetting(
-            "Top Glow",
-            "Show a smooth dark gradient below the window header.",
-            false
-    );
-
-    public ColorSetting topGlowColor = new ColorSetting(
-            "Top Glow Color",
-            "Color of the top glow effect (recommended: black with alpha).",
-            new Color(0, 0, 0, 100),
-            () -> topGlow.getValue()
-    );
+    public BooleanSetting glowEffect = new BooleanSetting("Glow Effect", "Enable a subtle fade-in glow from the left edge of each module.", false);
+    public ColorSetting glowColor = new ColorSetting("Glow Color", "Color and transparency of the subtle glow effect.", new Color(163, 255, 202, 100), () -> glowEffect.getValue());
+    public BooleanSetting topGlow = new BooleanSetting("Top Glow", "Show a smooth dark gradient below the window header.", false);
+    public ColorSetting topGlowColor = new ColorSetting("Top Glow Color", "Color of the top glow effect.", new Color(0, 0, 0, 100), () -> topGlow.getValue());
     public BooleanSetting showGear = new BooleanSetting("Show Gear", "Show open/close symbols next to module names.", false);
-    public TextSetting openSymbol = new TextSetting(
-            "OpenGear",
-            "Gear shown when module settings are collapsed",
-            "=",
-            () -> showGear.getValue()
-    );
-
-    public TextSetting closeSymbol = new TextSetting(
-            "CloseGear",
-            "Gear shown when module settings are expanded",
-            "≡",
-            () -> showGear.getValue()
-    );
+    public TextSetting openSymbol = new TextSetting("OpenGear", "Gear shown when module settings are collapsed", "=", () -> showGear.getValue());
+    public TextSetting closeSymbol = new TextSetting("CloseGear", "Gear shown when module settings are expanded", "≡", () -> showGear.getValue());
     public ColorSetting backgroundColor = new ColorSetting("Background", "GUI background color.", new Color(30, 30, 30, 150));
     public NumberSetting animationSpeed = new NumberSetting("Anim Speed", "Window open/close animation speed (ms).", 150, 50, 500);
 
@@ -84,6 +39,8 @@ public class ClickGuiFeature extends Feature {
             if (value) {
                 sounds.setValue(false);
                 outline.setValue(true);
+                buttonHeight.setValue(13.0);
+                guiWidth.setValue(92.0);
                 accentBar.setValue(false);
                 accentColor.setValue(new Color(163, 255, 202));
                 accentSide.setValue("Left");
@@ -100,7 +57,6 @@ public class ClickGuiFeature extends Feature {
                 animationSpeed.setValue(150.0);
                 enabledTextColor.setValue(Color.WHITE);
                 disabledTextColor.setValue(new Color(192, 192, 192));
-
                 super.setValue(false);
             } else {
                 super.setValue(false);
@@ -120,8 +76,7 @@ public class ClickGuiFeature extends Feature {
 
     @Override
     public void onDisable() {
-        if (getNull())
-            return;
+        if (getNull()) return;
         mc.setScreen(null);
     }
 }
