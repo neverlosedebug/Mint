@@ -12,6 +12,7 @@ public enum Category implements Nameable {
     Player("Player"),
     Legit("Legit"),
     Client("Client"),
+    Configs("Configs"),
     Scripts("Scripts");
 
     private final String name;

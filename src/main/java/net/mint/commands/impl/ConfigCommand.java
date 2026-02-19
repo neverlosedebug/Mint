@@ -3,6 +3,7 @@ package net.mint.commands.impl;
 import net.mint.commands.Command;
 import net.mint.commands.CommandInfo;
 import net.mint.Managers;
+import net.mint.modules.impl.configs.ConfigFeature;
 import net.mint.services.Services;
 
 import java.io.File;
@@ -53,6 +54,7 @@ public class ConfigCommand extends Command {
             Managers.CONFIG.setCurrentConfig(name);
             Managers.CONFIG.saveConfig();
             Services.CHAT.sendRaw("§s" + name + " §7has been saved as a config.");
+            ConfigFeature.refreshConfigList();
         } catch (Exception e) {
             Services.CHAT.sendRaw("§cFailed to save config §s" + name);
         } finally {
@@ -70,6 +72,7 @@ public class ConfigCommand extends Command {
         try {
             Managers.CONFIG.loadConfig(name);
             Services.CHAT.sendRaw("§s" + name + " §7has been loaded as a config.");
+            ConfigFeature.refreshConfigList();
         } catch (Exception e) {
             Services.CHAT.sendRaw("§cFailed to load config §s" + name);
         }
@@ -89,6 +92,7 @@ public class ConfigCommand extends Command {
 
         if (configFile.delete()) {
             Services.CHAT.sendRaw("§s" + name + " §7has been deleted.");
+            ConfigFeature.refreshConfigList();
         } else {
             Services.CHAT.sendRaw("§cFailed to delete config §s" + name);
         }

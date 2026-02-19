@@ -34,10 +34,9 @@ public class FeatureButton extends Button {
     private boolean open = false;
     private boolean searchMatch = false;
 
-    // Кеш для эффекта свечения
     private Color[] glowCache = null;
     private Color lastGlowColor = null;
-    private static final int GLOW_STEPS = 12; // Уменьшено с 25 до 12
+    private static final int GLOW_STEPS = 12;
 
     public FeatureButton(Feature feature, Window window) {
         super(window);
@@ -72,7 +71,6 @@ public class FeatureButton extends Button {
         return searchMatch;
     }
 
-    // Метод для предварительного расчета градиента свечения
     private void updateGlowCache(Color baseColor) {
         if (glowCache == null || !baseColor.equals(lastGlowColor)) {
             glowCache = new Color[GLOW_STEPS];
@@ -107,7 +105,6 @@ public class FeatureButton extends Button {
 
         ClickGuiFeature clickGui = Managers.FEATURE.getFeatureFromClass(ClickGuiFeature.class);
 
-        // Accent bar
         if (clickGui.accentBar.getValue()) {
             Color barColor = clickGui.accentColor.getColor();
             float barX1, barX2;
@@ -121,7 +118,6 @@ public class FeatureButton extends Button {
             Renderer2D.renderQuad(context, barX1, y1, barX2, y2, barColor);
         }
 
-        // Оптимизированный эффект свечения
         if (clickGui.glowEffect.getValue()) {
             Color glowColor = clickGui.glowColor.getColor();
             updateGlowCache(glowColor);
@@ -141,22 +137,18 @@ public class FeatureButton extends Button {
             }
         }
 
-        // Module outline
         if (clickGui.moduleOutline.getValue()) {
             Renderer2D.renderOutline(context, x1, y1, x2, y2, clickGui.outlineColor.getColor());
         }
 
-        // Gear symbol
         if (clickGui.showGear.getValue()) {
             String symbol = open ? clickGui.closeSymbol.getValue() : clickGui.openSymbol.getValue();
             drawTextWithShadow(context, symbol, getX() + getWidth() - 10, getY() + getVerticalPadding(), Color.WHITE);
         }
 
-        // Module name
         float tuffX = xAnimation.get(open ? getX() + getWidth() / 2 - (FontUtils.getWidth(feature.getName()) / 2.0F) : getX());
         drawTextWithShadow(context, feature.getName(), tuffX, getY() + getVerticalPadding(), getTextColor(textAnimation, feature.isEnabled()));
 
-        // Calculate settings buttons positions
         float currentY = super.getHeight();
         float targetY = 0;
 
@@ -173,7 +165,6 @@ public class FeatureButton extends Button {
 
         float scale = Easing.toDelta(openTime, 150);
 
-        // Render settings buttons
         if (open || scale != 1.0f) {
             float scaledHeight = targetY * (open ? scale : 1.0f - scale);
 
