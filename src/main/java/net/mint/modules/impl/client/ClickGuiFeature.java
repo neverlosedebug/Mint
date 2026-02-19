@@ -19,7 +19,7 @@ public class ClickGuiFeature extends Feature {
     public BooleanSetting accentBar = new BooleanSetting("Accent Bar", "Show a colored accent bar next to each module.", false);
     public ColorSetting accentColor = new ColorSetting("Accent Color", "Color of the module accent bar.", new Color(163, 255, 202), () -> accentBar.getValue());
     public ModeSetting accentSide = new ModeSetting("Accent Side", "Position of the accent bar.", "Left", new String[]{"Left", "Right"}, () -> accentBar.getValue());
-    public BooleanSetting moduleOutline = new BooleanSetting("Module Outline", "Show a colored outline around each module.", true);
+    public BooleanSetting moduleOutline = new BooleanSetting("Module Outline", "Show a colored outline around each module.", false);
     public ColorSetting outlineColor = new ColorSetting("Outline Color", "Color of the module outline.", new Color(0, 0, 0), () -> moduleOutline.getValue());
     public ColorSetting enabledTextColor = new ColorSetting("Enabled Text", "Color of enabled module names.", Color.WHITE);
     public ColorSetting disabledTextColor = new ColorSetting("Disabled Text", "Color of disabled module names.", new Color(192, 192, 192));
