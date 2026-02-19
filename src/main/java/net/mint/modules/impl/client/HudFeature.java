@@ -319,7 +319,7 @@ public class HudFeature extends Feature {
 
         if (hudNotifications.getValue() && !notificationEntries.isEmpty()) {
             float yOffset = 0;
-            float baseY = (mc.getWindow().getScaledHeight() / 2.0f) - 100.0f;
+            float baseY = (mc.getWindow().getScaledHeight() / 2.0f) - 170.0f;
 
             for (NotificationEntry entry : notificationEntries) {
                 float alpha = entry.getFadeAlpha();
