@@ -71,6 +71,8 @@ public class HudFeature extends Feature {
     public BooleanSetting showRoleInWelcomer = new BooleanSetting("ShowRoleInWelcomer", "Displays your Mint role in the welcome message.", false, () -> welcomer.getValue());
     public BooleanSetting moduleList = new BooleanSetting("ModuleList", "Displays a list of modules you have enabled.", true);
     public ModeSetting sortingMode = new ModeSetting("Sorting", "Mode", "Length", new String[]{"Length", "Alphabetical"}, () -> moduleList.getValue());
+    public BooleanSetting hudNotifications = new BooleanSetting("HudNotifications", "Shows module toggles in HUD.", true);
+    public ModeSetting notificationPos = new ModeSetting("NotificationPos", "Position of notifications", "Center", new String[]{"Center", "TopRight"}, () -> hudNotifications.getValue());
     public BooleanSetting coordinates = new BooleanSetting("Coordinates", "Displays your ingame world coordinates.", true);
     public BooleanSetting direction = new BooleanSetting("Direction", "Displays your ingame direction.", false);
     public BooleanSetting nether = new BooleanSetting("Nether", "Displays your coordinates if you were in the nether.", true, () -> coordinates.getValue());
@@ -102,6 +104,7 @@ public class HudFeature extends Feature {
     private final List<PotionEntry> potionEntries = new ArrayList<>();
     private final List<InfoEntry> infoEntries = new ArrayList<>();
     private final List<MiscEntry> miscEntries = new ArrayList<>();
+    private final List<NotificationEntry> notificationEntries = new ArrayList<>();
     private Float healthAnim = null;
 
     private double loadedChests = 0.0;
@@ -110,6 +113,9 @@ public class HudFeature extends Feature {
     @SubscribeEvent
     public void onTick(TickEvent event) {
         if (getNull()) return;
+        if (hudNotifications.getValue()) {
+            notificationEntries.removeIf(NotificationEntry::isExpired);
+        }
 
         if (moduleList.getValue()) {
             List<FeatureEntry> entries = new ArrayList<>();
@@ -310,6 +316,43 @@ public class HudFeature extends Feature {
     @SubscribeEvent
     public void renderHud(RenderHudEvent event) {
         if (mc.player == null) return;
+
+        if (hudNotifications.getValue() && !notificationEntries.isEmpty()) {
+            float yOffset = 0;
+            float baseY = (mc.getWindow().getScaledHeight() / 2.0f) - 100.0f;
+
+            for (NotificationEntry entry : notificationEntries) {
+                float alpha = entry.getFadeAlpha();
+                if (alpha <= 0) continue;
+
+                String text = entry.text;
+                float width = FontUtils.getWidth(text);
+                float height = FontUtils.getHeight();
+
+                float targetX, targetY;
+                if (notificationPos.getValue().equalsIgnoreCase("Center")) {
+                    targetX = (mc.getWindow().getScaledWidth() / 2.0f) - (width / 2.0f);
+                    float animX = entry.getAnimationX().get(targetX);
+                    targetX = animX;
+                } else {
+                    targetX = mc.getWindow().getScaledWidth() - width - 10;
+                    targetX = entry.getAnimationX().get(targetX);
+                }
+
+                targetY = baseY + yOffset;
+                targetY = entry.getAnimationY().get(targetY);
+
+                int colorRgb = entry.color.getRGB();
+                int r = (colorRgb >> 16) & 0xFF;
+                int g = (colorRgb >> 8) & 0xFF;
+                int b = colorRgb & 0xFF;
+                int a = (int) (255 * alpha);
+
+                FontUtils.drawTextWithShadow(event.getContext(), text, targetX, targetY, new Color(r, g, b, a));
+
+                yOffset += height + 2;
+            }
+        }
 
         if (welcomer.getValue()) {
             String playerName = mc.getSession().getUsername();
@@ -735,6 +778,33 @@ public class HudFeature extends Feature {
         else if (health > 8.0) return Formatting.GOLD;
         else if (health > 5.0) return Formatting.RED;
         return Formatting.DARK_RED;
+    }
+
+    public void addNotification(String text, Color color) {
+        if (!hudNotifications.getValue()) return;
+        if (notificationEntries.size() > 5) notificationEntries.remove(0);
+        notificationEntries.add(new NotificationEntry(text, color, System.currentTimeMillis()));
+    }
+
+    @AllArgsConstructor
+    @Getter
+    @Setter
+    public static class NotificationEntry extends AnimationEntry {
+        private String text;
+        private Color color;
+        private long startTime;
+        private final long duration = 3000;
+
+        public boolean isExpired() {
+            return System.currentTimeMillis() - startTime > duration;
+        }
+
+        public float getFadeAlpha() {
+            long elapsed = System.currentTimeMillis() - startTime;
+            if (elapsed < 500) return (float) elapsed / 500f;
+            if (elapsed > duration - 500) return 1.0f - (float) (elapsed - (duration - 500)) / 500f;
+            return 1.0f;
+        }
     }
 
     @Getter

@@ -6,6 +6,7 @@ import net.mint.Managers;
 import net.mint.Mint;
 import net.mint.services.Services;
 import net.mint.modules.impl.client.NotificationsFeature;
+import net.mint.modules.impl.client.HudFeature;
 import net.mint.modules.impl.misc.RoboticsFeature;
 import net.mint.settings.Setting;
 import net.mint.settings.types.*;
@@ -17,6 +18,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.client.util.InputUtil;
 
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,26 +33,21 @@ public class Feature implements Globals {
     public final BindSetting bind;
     public final ModeSetting bindMode;
     private boolean newEntry;
-
     private final Animation animationX;
     private final Animation animationY;
 
     public Feature() {
         FeatureInfo info = getClass().getAnnotation(FeatureInfo.class);
-
         int defaultBind = InputUtil.UNKNOWN_KEY.getCode();
-
         if (info != null) {
             name = info.name();
             desc = info.desc();
             category = info.category();
             defaultBind = info.bind();
         }
-
         hiddenMode = new ModeSetting("Hidden", "Changes if it gets displayed in the modulelist.", "Visible", new String[]{"Visible", "Hidden", "Info"});
         bind = new BindSetting("Bind", "Allows you to bind the module.", defaultBind);
         bindMode = new ModeSetting("Toggle", "Changes the bind mode of the module.", "Toggle", new String[]{"Toggle", "Hold"});
-
         animationX = new Animation(300, Easing.Method.EASE_OUT_CUBIC);
         animationY = new Animation(300, Easing.Method.EASE_OUT_CUBIC);
         enabled = false;
@@ -68,12 +65,10 @@ public class Feature implements Globals {
     public void setEnabled(boolean enabled, boolean notification) {
         boolean wasEnabled = this.enabled;
         this.enabled = enabled;
-
         Feature robotics = Managers.FEATURE.getFeatureByName("Robotics");
         if (robotics instanceof RoboticsFeature rf) {
             rf.syncToggle(this, enabled);
         }
-
         if (enabled && !wasEnabled) {
             newEntry = true;
             onEnable();
@@ -107,6 +102,10 @@ public class Feature implements Globals {
                     .append(Text.literal("§7."));
             Services.CHAT.sendModuleToggle(name, txt, true);
         }
+        Feature hudFeature = Managers.FEATURE.getFeatureByName("Hud");
+        if (hudFeature instanceof HudFeature hud) {
+            hud.addNotification(name + " §aenabled", new Color(0, 255, 0));
+        }
     }
 
     private void sendDisableNotification() {
@@ -118,6 +117,10 @@ public class Feature implements Globals {
                 .append(Text.literal("disabled").styled(s -> s.withColor(Formatting.RED)))
                 .append(Text.literal("§7."));
         Services.CHAT.sendModuleToggle(name, txt, true);
+        Feature hudFeature = Managers.FEATURE.getFeatureByName("Hud");
+        if (hudFeature instanceof HudFeature hud) {
+            hud.addNotification(name + " §cdisabled", new Color(255, 0, 0));
+        }
     }
 
     private NotificationsFeature getNotifications() {
