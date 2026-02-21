@@ -13,11 +13,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
-import java.util.Collections;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 public final class BotManager extends Manager implements Globals {
 
@@ -27,6 +25,8 @@ public final class BotManager extends Manager implements Globals {
     private final Map<UUID, String> playerCapes = new ConcurrentHashMap<>();
     private final Set<UUID> mintUsers = Collections.newSetFromMap(new ConcurrentHashMap<>());
     private final Map<UUID, String> mintByUuid = new ConcurrentHashMap<>();
+    private final Map<String, Integer> messageStats = new ConcurrentHashMap<>();
+    private int totalMessagesSent = 0;
 
     public BotManager() {
         super("Bot", "protectionn");
@@ -159,9 +159,15 @@ public final class BotManager extends Manager implements Globals {
     public void sendMessageFromPlayer(UUID playerUUID, String playerName, String message) {
         System.out.println("[IRC] Send from " + playerName + " (" + playerUUID + "): " + message);
         logToFile(playerName, message);
+        updateStats(playerName);
         if (mc.player != null && mc.world != null) {
             mc.player.sendMessage(Text.literal("§7[IRC] §f" + playerName + ": §a" + message), false);
         }
+    }
+
+    private void updateStats(String playerName) {
+        totalMessagesSent++;
+        messageStats.merge(playerName, 1, Integer::sum);
     }
 
     public void logToFile(String playerName, String message) {
@@ -218,30 +224,69 @@ public final class BotManager extends Manager implements Globals {
         System.out.println("[IRC] " + message);
         mc.player.sendMessage(Text.literal(message), false);
         logToFile(mc.player.getName().getString(), "has pinged their location!");
+        updateStats(mc.player.getName().getString());
     }
 
     public void requestPing(String target) {
         if (mc.player == null) return;
-
         String playerName = mc.player.getName().getString();
-        String messageText;
-
-        if ("everyone".equalsIgnoreCase(target) || target.isEmpty()) {
-            messageText = "§a[IRC] §f" + playerName + " §7has pinged their location to everyone!";
-            logToFile(playerName, "has pinged their location to everyone!");
-        } else {
-            messageText = "§a[IRC] §f" + playerName + " §7requested a ping from §f" + target + "§7.";
-            logToFile(playerName, "requested a ping from " + target + ".");
-        }
-
-        System.out.println("[IRC] " + messageText);
-        mc.player.sendMessage(Text.literal(messageText), false);
-
+        String message = "§a[IRC] §f" + playerName + " §7requested a ping from §f" + target + "§7.";
+        System.out.println("[IRC] " + message);
+        mc.player.sendMessage(Text.literal(message), false);
+        logToFile(playerName, "requested a ping from " + target + ".");
+        updateStats(playerName);
     }
 
-    public String getPlayerCape(UUID uuid) { return null; }
-    public Set<UUID> getmintUsers() { return Collections.unmodifiableSet(mintUsers); }
-    public void sendMessageToIrc(String message) { }
+    public String getPlayerCape(UUID uuid) {
+        return null;
+    }
+
+    public Set<UUID> getmintUsers() {
+        return Collections.unmodifiableSet(mintUsers);
+    }
+
+    public void sendMessageToIrc(String message) {
+    }
+
+    public int getTotalMessagesSent() {
+        return totalMessagesSent;
+    }
+
+    public Map<String, Integer> getChatStats() {
+        return Collections.unmodifiableMap(new HashMap<>(messageStats));
+    }
+
+    public String getMostActiveUser() {
+        if (messageStats.isEmpty()) {
+            return "No data";
+        }
+        return messageStats.entrySet().stream()
+                .max(Map.Entry.comparingByValue())
+                .map(entry -> entry.getKey() + " (" + entry.getValue() + " messages)")
+                .orElse("Unknown");
+    }
+
+    public void clearLogs() {
+        try {
+            Path logFile = getLogFile();
+            if (Files.exists(logFile)) {
+                Files.delete(logFile);
+                System.out.println("[BotManager] Log file cleared.");
+                if (mc.player != null) {
+                    mc.player.sendMessage(Text.literal("§a[IRC] Log file cleared successfully."), false);
+                }
+            } else {
+                if (mc.player != null) {
+                    mc.player.sendMessage(Text.literal("§e[IRC] Log file does not exist."), false);
+                }
+            }
+        } catch (IOException e) {
+            System.err.println("[BotManager] Failed to clear log file: " + e.getMessage());
+            if (mc.player != null) {
+                mc.player.sendMessage(Text.literal("§c[IRC] Failed to clear log file."), false);
+            }
+        }
+    }
 
     private static Path getMinecraftDir() {
         String os = System.getProperty("os.name").toLowerCase();
