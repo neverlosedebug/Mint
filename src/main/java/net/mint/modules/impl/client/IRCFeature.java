@@ -7,6 +7,7 @@ import net.mint.modules.Feature;
 import net.mint.modules.FeatureInfo;
 import net.mint.settings.types.BooleanSetting;
 import net.mint.utils.miscellaneous.irc.BotManager;
+import net.minecraft.text.Text;
 
 import java.util.UUID;
 
@@ -30,7 +31,21 @@ public class IRCFeature extends Feature {
         UUID playerUUID = mc.player.getUuid();
         String playerName = mc.player.getName().getString();
 
-        if (BotManager.INSTANCE != null && BotManager.INSTANCE.isConnected()) {
+        if (BotManager.INSTANCE == null || !BotManager.INSTANCE.isConnected()) {
+            mc.player.sendMessage(Text.literal("§c[IRC] Bot is not connected."), false);
+            return;
+        }
+
+        if (content.toLowerCase().startsWith("ping")) {
+            if (!requestPings.getValue()) {
+                mc.player.sendMessage(Text.literal("§c[IRC] Ping requests are disabled in settings."), false);
+                return;
+            }
+
+            String target = content.length() > 4 ? content.substring(4).trim() : "everyone";
+
+            BotManager.INSTANCE.requestPing(target);
+        } else {
             BotManager.INSTANCE.sendMessageFromPlayer(playerUUID, playerName, content);
         }
     }

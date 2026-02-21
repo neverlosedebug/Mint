@@ -222,10 +222,21 @@ public final class BotManager extends Manager implements Globals {
 
     public void requestPing(String target) {
         if (mc.player == null) return;
-        String message = "§a[IRC] §f" + mc.player.getName().getString() + " §7requested a ping from §f" + target + "§7.";
-        System.out.println("[IRC] " + message);
-        mc.player.sendMessage(Text.literal(message), false);
-        logToFile(mc.player.getName().getString(), "requested a ping from " + target + ".");
+
+        String playerName = mc.player.getName().getString();
+        String messageText;
+
+        if ("everyone".equalsIgnoreCase(target) || target.isEmpty()) {
+            messageText = "§a[IRC] §f" + playerName + " §7has pinged their location to everyone!";
+            logToFile(playerName, "has pinged their location to everyone!");
+        } else {
+            messageText = "§a[IRC] §f" + playerName + " §7requested a ping from §f" + target + "§7.";
+            logToFile(playerName, "requested a ping from " + target + ".");
+        }
+
+        System.out.println("[IRC] " + messageText);
+        mc.player.sendMessage(Text.literal(messageText), false);
+
     }
 
     public String getPlayerCape(UUID uuid) { return null; }
