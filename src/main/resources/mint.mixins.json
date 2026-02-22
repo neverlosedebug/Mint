@@ -40,6 +40,7 @@
     "FireworkParticleMixin",
     "GameRendererMixin",
     "GlyphMixin",
+    "MixinGameOptions",
     "HandledScreenMixin",
     "HeldItemRendererMixin",
     "InGameHudMixin",
