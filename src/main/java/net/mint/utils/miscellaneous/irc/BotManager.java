@@ -4,6 +4,11 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
+import net.dv8tion.jda.api.entities.channel.concrete.PrivateChannel;
+import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.requests.GatewayIntent;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.mint.Manager;
 import net.mint.Managers;
 import net.mint.utils.Globals;
@@ -15,7 +20,6 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 public final class BotManager extends Manager implements Globals {
 
@@ -27,6 +31,8 @@ public final class BotManager extends Manager implements Globals {
     private final Map<UUID, String> mintByUuid = new ConcurrentHashMap<>();
     private final Map<String, Integer> messageStats = new ConcurrentHashMap<>();
     private int totalMessagesSent = 0;
+    private boolean syncDmToGame = true;
+    private JDA jdaInstance = null;
 
     public BotManager() {
         super("Bot", "protectionn");
@@ -38,6 +44,43 @@ public final class BotManager extends Manager implements Globals {
         Managers.BOT = this;
         loadAuthData();
         loadMintUsers();
+    }
+
+    public void setJdaInstance(JDA jda) {
+        this.jdaInstance = jda;
+        if (jda != null) {
+            jda.addEventListener(new DiscordDMListener());
+        }
+    }
+
+    public boolean initializeDiscord(String token) {
+        if (token == null || token.isEmpty()) {
+            return false;
+        }
+        if (this.jdaInstance != null) {
+            this.jdaInstance.shutdown();
+            this.jdaInstance = null;
+        }
+        try {
+            JDA jda = net.dv8tion.jda.api.JDABuilder.createDefault(token)
+                    .enableIntents(
+                            GatewayIntent.DIRECT_MESSAGES,
+                            GatewayIntent.MESSAGE_CONTENT,
+                            GatewayIntent.GUILD_MESSAGES,
+                            GatewayIntent.GUILD_MEMBERS
+                    )
+                    .addEventListeners(new DiscordDMListener())
+                    .build();
+
+            jda.awaitReady();
+            this.jdaInstance = jda;
+            System.out.println("[BotManager] Discord initialized with Intents: DM, MessageContent, GuildMessages, GuildMembers");
+            return true;
+        } catch (Exception e) {
+            System.err.println("[BotManager] Failed to initialize Discord: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
     }
 
     private Path getAuthFile() {
@@ -59,18 +102,14 @@ public final class BotManager extends Manager implements Globals {
                 createDefaultAuthFile();
                 return;
             }
-
             String content = Files.readString(authFile);
             JsonObject json = new Gson().fromJson(content, JsonObject.class);
-
             if (json.has("username") && json.get("username").isJsonPrimitive()) {
                 this.authedMintUsername = json.get("username").getAsString().trim();
             }
-
             if (json.has("role") && json.get("role").isJsonPrimitive()) {
                 this.authedMintRank = normalizeRank(json.get("role").getAsString().trim());
             }
-
         } catch (IOException | JsonParseException e) {
             System.err.println("[BotManager] Failed to load auth.json: " + e.getMessage());
             this.authedMintUsername = "Error";
@@ -85,10 +124,8 @@ public final class BotManager extends Manager implements Globals {
                 createDefaultMintUsersFile();
                 return;
             }
-
             String content = Files.readString(usersFile);
             JsonArray jsonArray = new Gson().fromJson(content, JsonArray.class);
-
             if (jsonArray != null) {
                 for (int i = 0; i < jsonArray.size(); i++) {
                     JsonObject userObj = jsonArray.get(i).getAsJsonObject();
@@ -153,7 +190,7 @@ public final class BotManager extends Manager implements Globals {
     }
 
     public boolean isConnected() {
-        return true;
+        return jdaInstance != null && jdaInstance.getStatus() == net.dv8tion.jda.api.JDA.Status.CONNECTED;
     }
 
     public void sendMessageFromPlayer(UUID playerUUID, String playerName, String message) {
@@ -288,6 +325,14 @@ public final class BotManager extends Manager implements Globals {
         }
     }
 
+    public void setSyncDmToGame(boolean enabled) {
+        this.syncDmToGame = enabled;
+    }
+
+    public boolean isSyncDmToGame() {
+        return syncDmToGame;
+    }
+
     private static Path getMinecraftDir() {
         String os = System.getProperty("os.name").toLowerCase();
         Path userHome = Path.of(System.getProperty("user.home"));
@@ -297,6 +342,33 @@ public final class BotManager extends Manager implements Globals {
             return userHome.resolve("Library").resolve("Application Support").resolve("minecraft");
         } else {
             return userHome.resolve(".minecraft");
+        }
+    }
+
+    private class DiscordDMListener extends ListenerAdapter {
+        @Override
+        public void onMessageReceived(MessageReceivedEvent event) {
+            if (event.getAuthor().isBot()) return;
+
+            boolean isDM = event.getChannelType() == net.dv8tion.jda.api.entities.channel.ChannelType.PRIVATE;
+            if (!isDM) return;
+
+            if (!syncDmToGame) return;
+
+            String authorName = event.getAuthor().getName();
+            String messageContent = event.getMessage().getContentStripped();
+
+            if (mc != null && mc.player != null) {
+                String formattedMsg = "§b[Discord DM] §f" + authorName + "§7: §r" + messageContent;
+                mc.execute(() -> {
+                    if (mc.player != null) {
+                        mc.player.sendMessage(Text.literal(formattedMsg), false);
+                        logToFile("Discord@" + authorName, messageContent);
+                    }
+                });
+            } else {
+                System.out.println("[Discord DM] " + authorName + ": " + messageContent);
+            }
         }
     }
 }

@@ -16,7 +16,8 @@ public class SocialsFeature extends Feature {
 
     public TextSetting prefix = new TextSetting("Prefix", "Command prefix for social commands.", "!");
     public BooleanSetting showFeedback = new BooleanSetting("ShowFeedback", "Send confirmation messages to chat.", true);
-    public BooleanSetting allowStats = new BooleanSetting("AllowStats", "Allow usage of stats commands (!stats, !top).", true);
+    public BooleanSetting allowStats = new BooleanSetting("AllowStats", "Allow usage of stats commands.", true);
+    public BooleanSetting syncDiscordDM = new BooleanSetting("SyncDiscordDM", "Show Discord DMs in local chat.", true);
 
     @SubscribeEvent
     public void onChatSend(ChatSendEvent event) {
@@ -48,15 +49,13 @@ public class SocialsFeature extends Feature {
         try {
             switch (command) {
                 case "ping":
-                    // !ping [target]
                     bot.sendPingString();
                     commandHandled = true;
                     break;
 
                 case "reqping":
                 case "requestping":
-                    // !reqping <nickname>
-                    if (!Managers.BOT.isConnected()) {
+                    if (!bot.isConnected()) {
                         sendFeedback("§c[Socials] Bot is not connected.");
                         break;
                     }
@@ -68,13 +67,11 @@ public class SocialsFeature extends Feature {
                 case "clearlogs":
                 case "clearlog":
                 case "cls":
-                    // !clearlogs
                     bot.clearLogs();
                     commandHandled = true;
                     break;
 
                 case "stats":
-                    // !stats
                     if (!allowStats.getValue()) {
                         sendFeedback("§c[Socials] Stats commands are disabled in settings.");
                         break;
@@ -86,7 +83,6 @@ public class SocialsFeature extends Feature {
 
                 case "top":
                 case "mostactive":
-                    // !top
                     if (!allowStats.getValue()) {
                         sendFeedback("§c[Socials] Stats commands are disabled in settings.");
                         break;
@@ -98,7 +94,6 @@ public class SocialsFeature extends Feature {
 
                 case "status":
                 case "info":
-                    // !status
                     if (bot.isAuthed()) {
                         sendFeedback(String.format("§a[Socials] Logged in as: §f%s §7(§f%s§7)",
                                 bot.getAuthedMintUsername(), bot.getAuthedMintRank()));
@@ -108,14 +103,31 @@ public class SocialsFeature extends Feature {
                     commandHandled = true;
                     break;
 
+                case "discord":
+                    if (args.length < 2) {
+                        sendFeedback("§c[Socials] Usage: §f!discord <bot_token>");
+                        commandHandled = true;
+                        break;
+                    }
+                    String token = args[1];
+                    boolean success = bot.initializeDiscord(token);
+                    if (success) {
+                        sendFeedback("§a[Socials] Successfully connected to Discord!");
+                    } else {
+                        sendFeedback("§c[Socials] Failed to connect to Discord. Check console for errors.");
+                    }
+                    commandHandled = true;
+                    break;
+
                 case "help":
                     sendFeedback("§6--- Socials Commands ---");
                     sendFeedback("§f!ping §7- Ping your location.");
-                    sendFeedback("§f!reqping <nickname> §7- Request ping from someone.");
+                    sendFeedback("§f!reqping <nick> §7- Request ping from someone.");
                     sendFeedback("§f!clearlogs §7- Clear IRC log file.");
                     sendFeedback("§f!stats §7- Show total messages.");
                     sendFeedback("§f!top §7- Show most active user.");
                     sendFeedback("§f!status §7- Show login status.");
+                    sendFeedback("§f!discord <token> §7- Login to Discord.");
                     commandHandled = true;
                     break;
             }
@@ -129,17 +141,14 @@ public class SocialsFeature extends Feature {
         }
     }
 
-    private void sendFeedback(String text) {
-        if (showFeedback.getValue() && mc.player != null) {
-            mc.player.sendMessage(Text.literal(text), false);
-        }
-    }
-
     @Override
     public void onEnable() {
         if (getNull()) {
             setEnabled(false);
             return;
+        }
+        if (BotManager.INSTANCE != null) {
+            BotManager.INSTANCE.setSyncDmToGame(syncDiscordDM.getValue());
         }
         sendFeedback("§a[Socials] Module enabled. Use §f!help §afor commands.");
     }
@@ -147,5 +156,11 @@ public class SocialsFeature extends Feature {
     @Override
     public void onDisable() {
         sendFeedback("§e[Socials] Module disabled.");
+    }
+
+    private void sendFeedback(String text) {
+        if (showFeedback.getValue() && mc.player != null) {
+            mc.player.sendMessage(Text.literal(text), false);
+        }
     }
 }
