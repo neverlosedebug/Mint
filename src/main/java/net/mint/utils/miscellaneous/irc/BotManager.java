@@ -4,13 +4,13 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
-import net.dv8tion.jda.api.entities.channel.concrete.PrivateChannel;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.mint.Manager;
 import net.mint.Managers;
+import net.mint.modules.impl.client.IRCFeature;
 import net.mint.utils.Globals;
 import net.minecraft.text.Text;
 
@@ -33,6 +33,7 @@ public final class BotManager extends Manager implements Globals {
     private int totalMessagesSent = 0;
     private boolean syncDmToGame = true;
     private JDA jdaInstance = null;
+    private IRCFeature ircFeatureInstance = null;
 
     public BotManager() {
         super("Bot", "protectionn");
@@ -51,6 +52,10 @@ public final class BotManager extends Manager implements Globals {
         if (jda != null) {
             jda.addEventListener(new DiscordDMListener());
         }
+    }
+
+    public void setIrcFeatureInstance(IRCFeature feature) {
+        this.ircFeatureInstance = feature;
     }
 
     public boolean initializeDiscord(String token) {
@@ -194,6 +199,10 @@ public final class BotManager extends Manager implements Globals {
     }
 
     public void sendMessageFromPlayer(UUID playerUUID, String playerName, String message) {
+        if (ircFeatureInstance != null && ircFeatureInstance.isIgnored(playerName)) {
+            return;
+        }
+
         System.out.println("[IRC] Send from " + playerName + " (" + playerUUID + "): " + message);
         logToFile(playerName, message);
         updateStats(playerName);
@@ -356,6 +365,11 @@ public final class BotManager extends Manager implements Globals {
             if (!syncDmToGame) return;
 
             String authorName = event.getAuthor().getName();
+
+            if (ircFeatureInstance != null && ircFeatureInstance.isIgnored(authorName)) {
+                return;
+            }
+
             String messageContent = event.getMessage().getContentStripped();
 
             if (mc != null && mc.player != null) {

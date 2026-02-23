@@ -1,6 +1,5 @@
 package net.mint.modules.impl.client;
 
-import net.mint.Managers;
 import net.mint.events.SubscribeEvent;
 import net.mint.events.impl.ChatSendEvent;
 import net.mint.modules.Category;
