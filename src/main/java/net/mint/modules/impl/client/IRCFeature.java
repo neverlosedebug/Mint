@@ -2,6 +2,7 @@ package net.mint.modules.impl.client;
 
 import net.mint.events.SubscribeEvent;
 import net.mint.events.impl.ChatSendEvent;
+import net.mint.events.impl.ReceiveChatEvent;
 import net.mint.modules.Category;
 import net.mint.modules.Feature;
 import net.mint.modules.FeatureInfo;
@@ -12,12 +13,15 @@ import net.minecraft.text.Text;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @FeatureInfo(name = "IRC", category = Category.Client)
 public class IRCFeature extends Feature {
 
     public final BooleanSetting requestPings = new BooleanSetting("RequestPings", "To allow the request of pings from other Mint users.", true);
     public final List<String> ignoredUsers = new ArrayList<>();
+    private static final Pattern CHAT_PATTERN = Pattern.compile("^<([^>]+)>.*");
 
     @SubscribeEvent
     public void onChatSend(ChatSendEvent event) {
@@ -34,11 +38,6 @@ public class IRCFeature extends Feature {
         UUID playerUUID = mc.player.getUuid();
         String playerName = mc.player.getName().getString();
 
-        if (BotManager.INSTANCE == null || !BotManager.INSTANCE.isConnected()) {
-            mc.player.sendMessage(Text.literal("§c[IRC] Bot is not connected."), false);
-            return;
-        }
-
         if (content.toLowerCase().startsWith("ignore")) {
             handleIgnoreCommand(content);
             return;
@@ -54,6 +53,11 @@ public class IRCFeature extends Feature {
             return;
         }
 
+        if (BotManager.INSTANCE == null || !BotManager.INSTANCE.isConnected()) {
+            mc.player.sendMessage(Text.literal("§c[IRC] Bot is not connected."), false);
+            return;
+        }
+
         if (content.toLowerCase().startsWith("ping")) {
             if (!requestPings.getValue()) {
                 mc.player.sendMessage(Text.literal("§c[IRC] Ping requests are disabled in settings."), false);
@@ -65,6 +69,43 @@ public class IRCFeature extends Feature {
         } else {
             BotManager.INSTANCE.sendMessageFromPlayer(playerUUID, playerName, content);
         }
+    }
+
+    @SubscribeEvent
+    public void onReceiveChat(ReceiveChatEvent event) {
+        if (mc.player == null || event.getMessage() == null) return;
+
+        Text messageText = event.getMessage();
+        String messageString = messageText.getString();
+
+        if (!messageString.startsWith("@")) return;
+
+        String senderName = extractSenderName(messageString);
+
+        if (senderName != null && isIgnored(senderName)) {
+            event.setMessage(Text.empty());
+
+            event.setCancelled(true); // xd
+        }
+    }
+
+    private String extractSenderName(String message) {
+        Matcher matcher = CHAT_PATTERN.matcher(message);
+        if (matcher.matches()) {
+            return matcher.group(1).trim();
+        }
+
+        int colonIndex = message.indexOf(":");
+        if (colonIndex != -1) {
+            String prefixPart = message.substring(0, colonIndex);
+            int lastSpace = prefixPart.lastIndexOf(" ");
+            if (lastSpace != -1 && lastSpace < prefixPart.length() - 1) {
+                return prefixPart.substring(lastSpace + 1).trim();
+            }
+            return prefixPart.trim();
+        }
+
+        return null;
     }
 
     private void handleIgnoreCommand(String content) {
