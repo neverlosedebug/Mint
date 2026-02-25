@@ -38,6 +38,7 @@
     "DrawContextMixin",
     "EntityRendererMixin",
     "FireworkParticleMixin",
+    "TitleScreenMixin",
     "GameRendererMixin",
     "GlyphMixin",
     "MixinGameOptions",
